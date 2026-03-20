@@ -52,6 +52,7 @@ export async function apiFetch<T = any>(
         credentials: "include",
     };
 
+
     const response = await fetch(API_URL + url, finalOptions);
 
     if (raw) return response; // возвращаем настоящий Response
