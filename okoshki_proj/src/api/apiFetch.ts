@@ -28,71 +28,71 @@ interface ApiFetchResult<T = any> {
     data: T;
 }
 
-export async function apiFetch<T = any>(
-    url: string,
-    options: ApiFetchOptions = {},
-    raw = false
-): Promise<ApiFetchResult<T> | Response> {
-    if (!(options?.method in safeMethods)) {
-        await fetchCSRFToken();
-    }
-
-    const isFormData = options.body instanceof FormData;
-    const defaultHeaders = isFormData
-        ? {}
-        : { "Content-Type": "application/json;charset=utf-8" };
-
-    const finalOptions: RequestInit = {
-        ...options,
-        headers: {
-            ...defaultHeaders,
-            ...(options.headers || {}),
-            "X-CSRF-Token": csrfToken,
-        },
-        credentials: "include",
-    };
-
-
-    const response = await fetch(API_URL + url, finalOptions);
-
-    if (raw) return response; // возвращаем настоящий Response
-
-    const contentType = response.headers.get("Content-Type");
-    let data: any = null;
-
-    if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-    } else {
-        data = await response.text();
-    }
-
-    return {
-        ok: response.ok,
-        status: response.status,
-        data,
-    };
-}
-
-
-// export async function apiFetch(url: string, options: any) {
-//     await new Promise((r) => setTimeout(r, 500));
-//
-//     if (url === "/auth/login") {
-//         const { email, password } = JSON.parse(options.body);
-//         if (email === "test@example.com" && password === "123456A") {
-//             return {
-//                 ok: true,
-//                 status: 200,
-//                 data: { user: { email, name: "Test User" } },
-//             };
-//         } else {
-//             return {
-//                 ok: false,
-//                 status: 401,
-//                 data: { message: "Неправильный email или пароль" },
-//             };
-//         }
+// export async function apiFetch<T = any>(
+//     url: string,
+//     options: ApiFetchOptions = {},
+//     raw = false
+// ): Promise<ApiFetchResult<T> | Response> {
+//     if (!(options?.method in safeMethods)) {
+//         await fetchCSRFToken();
 //     }
 //
-//     return { ok: false, status: 404, data: {} };
+//     const isFormData = options.body instanceof FormData;
+//     const defaultHeaders = isFormData
+//         ? {}
+//         : { "Content-Type": "application/json;charset=utf-8" };
+//
+//     const finalOptions: RequestInit = {
+//         ...options,
+//         headers: {
+//             ...defaultHeaders,
+//             ...(options.headers || {}),
+//             "X-CSRF-Token": csrfToken,
+//         },
+//         credentials: "include",
+//     };
+//
+//
+//     const response = await fetch(API_URL + url, finalOptions);
+//
+//     if (raw) return response; // возвращаем настоящий Response
+//
+//     const contentType = response.headers.get("Content-Type");
+//     let data: any = null;
+//
+//     if (contentType && contentType.includes("application/json")) {
+//         data = await response.json();
+//     } else {
+//         data = await response.text();
+//     }
+//
+//     return {
+//         ok: response.ok,
+//         status: response.status,
+//         data,
+//     };
 // }
+
+
+export async function apiFetch(url: string, options: any) {
+    await new Promise((r) => setTimeout(r, 500));
+
+    if (url === "/auth/login") {
+        const { email, password } = JSON.parse(options.body);
+        if (email === "test@example.com" && password === "123456A") {
+            return {
+                ok: true,
+                status: 200,
+                data: { user: { email, name: "Test User" } },
+            };
+        } else {
+            return {
+                ok: false,
+                status: 401,
+                data: { message: "Неправильный email или пароль" },
+            };
+        }
+    }
+
+    return { ok: false, status: 404, data: {} };
+}
