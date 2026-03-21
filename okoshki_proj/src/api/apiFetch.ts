@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL as string; // TS знает, что это string
+const API_URL = import.meta.env.VITE_API_URL as string;
 export let csrfToken = "";
 
 const safeMethods = {
@@ -55,8 +55,7 @@ export async function apiFetch<T = any>(
 
     const response = await fetch(API_URL + url, finalOptions);
 
-    if (raw) return response; // возвращаем настоящий Response
-
+    if (raw) return response;
     const contentType = response.headers.get("Content-Type");
     let data: any = null;
 

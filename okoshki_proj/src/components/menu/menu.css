@@ -64,6 +64,18 @@
     content: url("../../static/imgs/calendar_btn_hover.svg");
 }
 
+#toMasters_search__btn:hover{
+    cursor: not-allowed;
+    background-color: #9590B6;
+}
+#toProfile__btn:hover{
+    cursor: not-allowed;
+    background-color: #9590B6;
+}
+#toCalendar__btn:hover{
+    cursor: not-allowed;
+    background-color: #9590B6;
+}
 
 
 

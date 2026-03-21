@@ -1,7 +1,24 @@
 import Menu from "../../components/menu/menu.tsx"
 import arrow from "../../static/imgs/arrow_right.svg";
+import {useEffect, useState} from "react";
+import {apiFetch} from "../../api/apiFetch.ts";
 
 export default function Collections() {
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        apiFetch("http://localhost:8080/api/v1/categories")
+            .then(res => {
+                if (res.ok) {
+                    setCategories(res.data);
+                } else {
+                    console.error(res);
+                }
+            })
+            .catch(console.error);
+    }, []);
+
+    console.log(categories);
     return (
     <div className="collections">
         <Menu/>

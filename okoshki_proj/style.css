@@ -43,7 +43,7 @@ html, body {
 
 hr {
     border: none;
-    height: 3px;
+    height: 5px;
     background-color: rgba(0,0,0,0.2);
     border-radius: 100px;
     width: 100%;
