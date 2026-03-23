@@ -31,9 +31,11 @@ interface ApiFetchResult<T = any> {
 export async function apiFetch<T = any>(
     url: string,
     options: ApiFetchOptions = {},
-    raw = false
+    raw = false,
+    skipCSRF = true // Добавьте параметр для пропуска CSRF
 ): Promise<ApiFetchResult<T> | Response> {
-    if (!(options?.method in safeMethods)) {
+    // Проверяем, нужно ли пропускать CSRF
+    if (!skipCSRF && !(options.method in safeMethods)) {
         await fetchCSRFToken();
     }
 
@@ -45,9 +47,9 @@ export async function apiFetch<T = any>(
     const finalOptions: RequestInit = {
         ...options,
         headers: {
-            ...defaultHeaders,
+            // ...defaultHeaders,
             ...(options.headers || {}),
-            "X-CSRF-Token": csrfToken,
+            // "X-CSRF-Token": csrfToken,
         },
         credentials: "include",
     };
@@ -64,6 +66,8 @@ export async function apiFetch<T = any>(
     } else {
         data = await response.text();
     }
+
+    console.log(response.status);
 
     return {
         ok: response.ok,

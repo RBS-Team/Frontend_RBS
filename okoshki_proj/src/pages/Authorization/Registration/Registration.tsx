@@ -1,10 +1,16 @@
 import bg from "../../../static/imgs/Registration_background.svg";
 import star from "../../../static/imgs/star_auth.svg";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../../../api/apiFetch.ts";
-import {useNavigate} from "react-router-dom";
-import {validateAuthOnSubmit, validateAuth} from "../../../validation/CheckAuth.ts";
-import {useForm} from "../../../hooks/useForm.ts";
+import { Link, useNavigate } from "react-router-dom";
+import {
+    validateAuthOnSubmit,
+    validateAuth,
+    handleServerError,
+    mapServerErrorToValidation,
+    type ServerError
+} from "../../../validation/CheckAuth.ts";
+import { useForm } from "../../../hooks/useForm.ts";
 import { useDebounce } from "use-debounce";
 
 interface Props {
@@ -20,65 +26,149 @@ export default function Registration({ onLogin }: Props) {
 
     const [debouncedValues] = useDebounce(values, 300);
     const [errors, setErrors] = useState({ email: "", password: "" });
+    const [serverError, setServerError] = useState<string | null>(null);
 
     useEffect(() => {
         setErrors(validateAuth(debouncedValues));
+        setServerError(null);
     }, [debouncedValues]);
 
     const onSubmit = async (data: any) => {
         const validationErrors = validateAuthOnSubmit(values);
         setErrors(validationErrors);
+        if (Object.keys(validationErrors).length > 0) {
+            return;
+        }
 
-        if (Object.keys(validationErrors).length > 0) return;
-        const res = await apiFetch("/auth/register", {
-            method: "POST",
-            body: JSON.stringify(data),
-        });
+        try {
+            const res = await apiFetch("/client/register", {
+                method: "POST",
+                body: JSON.stringify(data),
+            });
 
-        if (res.ok) {
-            onLogin(res.data.user);
-            navigate("/");
+            console.log(res);
+
+            if (res.ok) {
+                onLogin({ id: res.data.id });
+                navigate("/");
+            } else {
+                const errorForHandler = {
+                    response: {
+                        status: res.status,
+                        data: res.data
+                    }
+                };
+
+                const serverErrorObj = handleServerError(errorForHandler);
+                const mappedErrors = mapServerErrorToValidation(serverErrorObj);
+
+                if (Object.keys(mappedErrors).length > 0) {
+                    setErrors(prev => ({ ...prev, ...mappedErrors }));
+                } else {
+                    setServerError(serverErrorObj.message);
+                }
+            }
+        } catch (error: any) {
+            console.error("Registration error:", error);
+
+            let serverErrorObj: ServerError;
+            if (error.response) {
+                serverErrorObj = handleServerError(error);
+            } else if (error.request) {
+                serverErrorObj = {
+                    type: 'server_error',
+                    message: 'Нет соединения с сервером. Проверьте интернет-соединение'
+                };
+            } else {
+                serverErrorObj = {
+                    type: 'server_error',
+                    message: 'Произошла ошибка при регистрации. Попробуйте позже.'
+                };
+            }
+            const mappedErrors = mapServerErrorToValidation(serverErrorObj);
+            if (Object.keys(mappedErrors).length > 0) {
+                setErrors(prev => ({ ...prev, ...mappedErrors }));
+            } else {
+                setServerError(serverErrorObj.message);
+            }
         }
     };
-    return <div className="auth__page">
-        <img src={bg} alt="bg" className="auth_left__image"/>
-        <div className="auth_right__form">
-            <div className="auth_right__form__block" >
-                <div className="auth_right__form__block__inside">
-                    <div className="auth_info">
-                        <img src={star} alt="star" className="auth__info_star"/>
-                        <h1 className="auth__header">
-                            <span>С</span><span>о</span><span>з</span><span>д</span><span>а</span><span>т</span><span>ь</span>
-                            <span>&nbsp;</span>
-                            <span>а</span><span>к</span><span>к</span><span>а</span><span>у</span><span>н</span><span>т</span>
-                        </h1>
-                        <p className="auth__text">Мы соединяем тех, кто дарит красоту, и тех, кто её достоин.
-                            Присоединяйся!</p>
-                    </div>
-                    <form onSubmit={handleSubmit(onSubmit)} className="auth_reg_form">
-                        <div>
-                            <div className="input-group">
-                                <input type="email" id="email" placeholder=" " name="email" className={errors.email ? "input-error" : ""} value={values.email}
-                                       onChange={handleChange}/>
-                                <label htmlFor="email" className={errors.email ? "label-error" : ""}>Введите e-mail</label>
-                            </div>
-                            {errors.email && <p className="showError">{errors.email}</p>}
+
+    return (
+        <div className="auth__page">
+            <img src={bg} alt="bg" className="auth_left__image"/>
+            <div className="auth_right__form">
+                <div className="auth_right__form__block">
+                    <div className="auth_right__form__block__inside">
+                        <div className="auth_info">
+                            <img src={star} alt="star" className="auth__info_star"/>
+                            <h1 className="auth__header">
+                                <span>С</span><span>о</span><span>з</span><span>д</span><span>а</span><span>т</span><span>ь</span>
+                                <span>&nbsp;</span>
+                                <span>а</span><span>к</span><span>к</span><span>а</span><span>у</span><span>н</span><span>т</span>
+                            </h1>
+                            <p className="auth__text">Мы соединяем тех, кто дарит красоту, и тех, кто её достоин.
+                                Присоединяйся!</p>
                         </div>
 
-                        <div>
-                            <div className="input-group">
-                                <input type="password" id="password" name="password" placeholder=" " className={errors.password ? "input-error" : ""}  value={values.password}
-                                       onChange={handleChange}/>
-                                <label htmlFor="password" className={errors.password ? "label-error" : ""}>Придумайте пароль</label>
+                        <form onSubmit={handleSubmit(onSubmit)} className="auth_reg_form">
+                            {serverError && (
+                                <div className="server-error" style={{ marginBottom: "15px" }}>
+                                    <p className="showError" style={{ color: "red", fontSize: "14px" }}>
+                                        {serverError}
+                                    </p>
+                                </div>
+                            )}
+
+                            <div>
+                                <div className="input-group">
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        placeholder=" "
+                                        name="email"
+                                        className={errors.email ? "input-error" : ""}
+                                        value={values.email}
+                                        onChange={handleChange}
+                                    />
+                                    <label htmlFor="email" className={errors.email ? "label-error" : ""}>
+                                        Введите e-mail
+                                    </label>
+                                </div>
+                                {errors.email && <p className="showError">{errors.email}</p>}
                             </div>
-                            {errors.password && <p className="showError">{errors.password}</p>}
-                        </div>
-                        <button className="auth__btn_submit" type="submit">
-                            Создать аккаунт
-                        </button>
-                    </form>
+
+                            <div>
+                                <div className="input-group">
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        placeholder=" "
+                                        className={errors.password ? "input-error" : ""}
+                                        value={values.password}
+                                        onChange={handleChange}
+                                    />
+                                    <label htmlFor="password" className={errors.password ? "label-error" : ""}>
+                                        Придумайте пароль
+                                    </label>
+                                </div>
+                                {errors.password && <p className="showError">{errors.password}</p>}
+                            </div>
+
+                            <div className="decorated-text">
+                                <Link to="/login" className="goTo__link">
+                                    <p className="pre_link__text">Уже есть аккаунт?</p> Войти
+                                </Link>
+                            </div>
+
+                            <button className="auth__btn_submit" type="submit">
+                                Создать аккаунт
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>;
+    );
 }

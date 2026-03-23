@@ -7,7 +7,7 @@ export default function Collections() {
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
-        apiFetch("http://localhost:8080/api/v1/categories")
+        apiFetch("/categories")
             .then(res => {
                 if (res.ok) {
                     setCategories(res.data);
@@ -18,7 +18,6 @@ export default function Collections() {
             .catch(console.error);
     }, []);
 
-    console.log(categories);
     return (
     <div className="collections">
         <Menu/>
