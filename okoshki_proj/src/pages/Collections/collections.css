@@ -4,12 +4,15 @@
     gap: 10px;
 }
 
-.collection___right_section h1, p{
+.right_section h1, p{
     margin: 0;
 }
 
+.right_section__up{
+    flex-shrink: 0;
+}
 
-.collection___right_section{
+.right_section{
     margin-top: 1vh;
     margin-left: 1vw;
     display: flex;

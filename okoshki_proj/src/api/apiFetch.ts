@@ -7,7 +7,7 @@ const safeMethods = {
 } as const;
 
 export async function fetchCSRFToken(): Promise<void> {
-    const res = await fetch(`${API_URL}/auth/csrf`, {
+    const res = await fetch(`${API_URL}/csrf-token`, {
         method: "GET",
         credentials: "include",
     });
@@ -31,11 +31,9 @@ interface ApiFetchResult<T = any> {
 export async function apiFetch<T = any>(
     url: string,
     options: ApiFetchOptions = {},
-    raw = false,
-    skipCSRF = true // Добавьте параметр для пропуска CSRF
+    raw = false
 ): Promise<ApiFetchResult<T> | Response> {
-    // Проверяем, нужно ли пропускать CSRF
-    if (!skipCSRF && !(options.method in safeMethods)) {
+    if (!(options?.method in safeMethods)) {
         await fetchCSRFToken();
     }
 
@@ -47,9 +45,9 @@ export async function apiFetch<T = any>(
     const finalOptions: RequestInit = {
         ...options,
         headers: {
-            // ...defaultHeaders,
+            ...defaultHeaders,
             ...(options.headers || {}),
-            // "X-CSRF-Token": csrfToken,
+            "X-CSRF-Token": csrfToken,
         },
         credentials: "include",
     };
@@ -67,35 +65,9 @@ export async function apiFetch<T = any>(
         data = await response.text();
     }
 
-    console.log(response.status);
-
     return {
         ok: response.ok,
         status: response.status,
         data,
     };
 }
-
-
-// export async function apiFetch(url: string, options: any) {
-//     await new Promise((r) => setTimeout(r, 500));
-//
-//     if (url === "/auth/login") {
-//         const { email, password } = JSON.parse(options.body);
-//         if (email === "test@example.com" && password === "123456A") {
-//             return {
-//                 ok: true,
-//                 status: 200,
-//                 data: { user: { email, name: "Test User" } },
-//             };
-//         } else {
-//             return {
-//                 ok: false,
-//                 status: 401,
-//                 data: { message: "Неправильный email или пароль" },
-//             };
-//         }
-//     }
-//
-//     return { ok: false, status: 404, data: {} };
-// }

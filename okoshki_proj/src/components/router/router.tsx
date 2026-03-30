@@ -3,6 +3,7 @@ import Login from "../../pages/Authorization/Login/Login";
 import Registration from "../../pages/Authorization/Registration/Registration";
 import Collections from "../../pages/Collections/collections";
 import { useAuth } from "../../context/AuthContext";
+import MastersList from "../../pages/MastersList/masters_list.tsx";
 
 export default function AppRouter() {
     const { user, login, loading } = useAuth();
@@ -18,6 +19,10 @@ export default function AppRouter() {
             <Route
                 path="/registration"
                 element={!user ? <Registration onLogin={login} /> : <Navigate to="/" replace />}
+            />
+            <Route
+                path="/categories/id"
+                element={user ? <MastersList /> : <Navigate to="/login" replace />}
             />
             <Route
                 path="/*"

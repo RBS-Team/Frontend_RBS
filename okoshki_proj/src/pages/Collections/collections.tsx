@@ -2,6 +2,8 @@ import Menu from "../../components/menu/menu.tsx"
 import arrow from "../../static/imgs/arrow_right.svg";
 import {useEffect, useState} from "react";
 import {apiFetch} from "../../api/apiFetch.ts";
+import Category_list from "./category_list.tsx";
+
 
 export default function Collections() {
     const [categories, setCategories] = useState([]);
@@ -18,11 +20,13 @@ export default function Collections() {
             .catch(console.error);
     }, []);
 
+
+
     return (
     <div className="collections">
         <Menu/>
-        <div className="collection___right_section">
-            <div className="collection___right_section__up">
+        <div className="right_section">
+            <div className="right_section__up">
                 <p className="collection_date">21 марта, пятница</p>
                 <h1 className="collect__login">Привет, Гоша</h1>
             </div>
@@ -47,76 +51,7 @@ export default function Collections() {
                     <h2 className="block__category_speactialist__title">
                         Подборки лучших специалистов в твоем городе
                     </h2>
-                    <div className="block__category_speactialist__all_blocks">
-                        <div className="block__category_speactialist__block">
-                            <div className="block__category__card_info">
-                                <div className="block__category__card_info__main">
-                                    <h1 className="category_speactialist__title">
-                                        Маникюр
-                                    </h1>
-                                    <p className="category_speactialist__amount">
-                                        Найдено 12+ тыс. специалистов
-                                        неподалеку от вас
-                                    </p>
-                                </div>
-                                <button className="block__search_speacialist__submit">
-                                    <p>Подробнее</p>
-                                    <img src={arrow} alt=""/>
-                                </button>
-                            </div>
-                        </div>
-                        <div className="block__category_speactialist__block">
-                            <div className="block__category__card_info">
-                                <div className="block__category__card_info__main">
-                                    <h1 className="category_speactialist__title">
-                                        Маникюр
-                                    </h1>
-                                    <p className="category_speactialist__amount">
-                                        Найдено 12+ тыс. специалистов
-                                        неподалеку от вас
-                                    </p>
-                                </div>
-                                <button className="block__search_speacialist__submit">
-                                    <p>Подробнее</p>
-                                    <img src={arrow} alt=""/>
-                                </button>
-                            </div>
-                        </div>
-                        <div className="block__category_speactialist__block">
-                            <div className="block__category__card_info">
-                                <div className="block__category__card_info__main">
-                                    <h1 className="category_speactialist__title">
-                                        Маникюр
-                                    </h1>
-                                    <p className="category_speactialist__amount">
-                                        Найдено 12+ тыс. специалистов
-                                        неподалеку от вас
-                                    </p>
-                                </div>
-                                <button className="block__search_speacialist__submit">
-                                    <p>Подробнее</p>
-                                    <img src={arrow} alt=""/>
-                                </button>
-                            </div>
-                        </div>
-                        <div className="block__category_speactialist__block">
-                            <div className="block__category__card_info">
-                                <div className="block__category__card_info__main">
-                                    <h1 className="category_speactialist__title">
-                                        Маникюр
-                                    </h1>
-                                    <p className="category_speactialist__amount">
-                                        Найдено 12+ тыс. специалистов
-                                        неподалеку от вас
-                                    </p>
-                                </div>
-                                <button className="block__search_speacialist__submit">
-                                    <p>Подробнее</p>
-                                    <img src={arrow} alt=""/>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <Category_list categories={categories} />
                 </div>
             </div>
         </div>
