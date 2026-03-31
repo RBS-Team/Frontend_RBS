@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
+    "build:tsc": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "start": "npm run dev -- --port 8000"
+    "preview": "vite preview --port 8000 --host",
+    "start": "npm run build && npm run preview"
   },
   "dependencies": {
     "react": "^19.2.4",

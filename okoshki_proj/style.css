@@ -2,6 +2,7 @@
 @import "./src/components/menu/menu.css";
 @import "./src/pages/Collections/collections.css";
 @import "./src/static/styles/variables.css";
+@import "./src/pages/MastersList/masters_list.css";
 
 @font-face {
     font-family: 'Montserrat';
@@ -28,6 +29,7 @@
 }
 * {
     box-sizing: border-box;
+    overflow: hidden;
 }
 html, body {
     margin: 0;

@@ -1,39 +1,33 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../../pages/Authorization/Login/Login";
 import Registration from "../../pages/Authorization/Registration/Registration";
-import CheckRoute from "./check_route.tsx";
-import Collections from "../../pages/Collections/collections.tsx";
-import GuestRoute from "./GuestRoute.tsx";
+import Collections from "../../pages/Collections/collections";
+import { useAuth } from "../../context/AuthContext";
+import MastersList from "../../pages/MastersList/masters_list.tsx";
 
+export default function AppRouter() {
+    const { user, login, loading } = useAuth();
 
-export default function AppRouter({ user, login }: any) {
+    if (loading) return null;
+
     return (
         <Routes>
-            <Route path="/login" element={
-                <GuestRoute user={user}>
-                <Login onLogin={login} />
-                </GuestRoute>
-            } />
-
-
-
-            <Route path="/registration" element={
-                <GuestRoute user={user}>
-                <Registration onLogin={login} />
-                </GuestRoute>
-            } />
-
-
+            <Route
+                path="/login"
+                element={!user ? <Login onLogin={login} /> : <Navigate to="/" replace />}
+            />
+            <Route
+                path="/registration"
+                element={!user ? <Registration onLogin={login} /> : <Navigate to="/" replace />}
+            />
+            <Route
+                path="/categories/id"
+                element={user ? <MastersList /> : <Navigate to="/login" replace />}
+            />
             <Route
                 path="/*"
-                element={
-                    <CheckRoute user={user}>
-                        <Collections />
-                    </CheckRoute>
-                }
+                element={user ? <Collections /> : <Navigate to="/login" replace />}
             />
-
-
         </Routes>
     );
 }

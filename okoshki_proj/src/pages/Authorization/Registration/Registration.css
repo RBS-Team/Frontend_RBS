@@ -147,6 +147,45 @@ input:focus{
     margin-top: 0;
 }
 
+.decorated-text {
+    display: flex;
+    align-items: center; /* Центрирование по вертикали */
+    text-align: center;
+    color: #333;
+}
+
+.decorated-text::before,
+.decorated-text::after {
+    content: '';
+    flex: 1; /* Линии занимают все свободное место */
+    border-bottom: 3px solid #757575; /* Цвет и толщина линий */
+    border-radius: 100px;
+    margin: 0 10px; /* Расстояние между линиями и текстом */
+}
+
+.goTo__link{
+    text-decoration: none;
+    font-family: Montserrat,sans-serif;
+    font-weight: 600;
+    color: var(--main-color);
+    transition: color 0.3s;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.goTo__link:hover{
+    color: #6557CD;
+    transition: color 0.3s;
+}
+
+.pre_link__text{
+    font-family: Montserrat,sans-serif;
+    font-weight: 500;
+    color: black;
+}
+
+
 
 
 
