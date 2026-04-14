@@ -7,7 +7,7 @@ export function useForm<T>(
     const [values, setValues] = useState(initialValues);
     const [errors, setErrors] = useState<Partial<T>>({});
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setValues({
             ...values,
             [e.target.name]: e.target.value,

@@ -185,6 +185,14 @@ input:focus{
     color: black;
 }
 
+.center-text{
+    display: flex;
+    margin-top: 5vh;
+    justify-content: center;
+    text-align: center;
+    font-size: clamp(0.3rem, 3vw, 1.3rem);
+}
+
 
 
 

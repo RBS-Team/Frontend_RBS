@@ -1,51 +1,49 @@
 
 .menu {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 5vh;
-    height: 100vh;
-    width: 19vw;
+    height: 10vh;
+    width: 100vw;
     align-items: center;
-    margin-left: 2vw;
-    padding-right: 2vw;
-    border-right: 3px solid rgba(0,0,0,0.2);
+    background-color: #DEE2FF;
+    position: relative;
 }
 
 .menu__sections{
     display: flex;
     align-items: center;
-    flex-direction: column;
-    gap: 5vh;
+    flex-direction: row;
+    gap: 5vw;
     width: 100%;
 }
 
 .logo{
-    height: 119px;
-    width: 109px;
+    height: 75%;
+    width: auto;
+    margin-left: 2vw;
 }
 
 .section__btn{
-    width: 100%;
     height: 8vh;
     border-radius: 7px;
     border: none;
-    filter: drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.1));
-    background-color: white;
-    color: var(--main-color);
+    color: #A19CCC;
     font-family: Montserrat,sans-serif;
     font-weight: 600;
+    font-size: clamp(0.2rem, 3vw, 1.5rem);
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 5%;
-    padding-left: 5%;
-    transition: background-color 0.3s, color 0.3s;
+    transition:  color 0.3s;
+    background-color: transparent;
 }
 
 .section__btn:hover{
     cursor: pointer;
-    background-color: var(--main-color);;
-    color: white;
+    background-color: transparent;
+    color: var(--main-color);
 }
 
 #toMasters_collection__btn:hover img{
@@ -56,25 +54,33 @@
     content: url("../../static/imgs/seatch_btn_hover.svg");
 }
 
-#toProfile__btn:hover img{
-    content: url("../../static/imgs/profile_btn_hover.svg");
-}
-
 #toCalendar__btn:hover img{
     content: url("../../static/imgs/calendar_btn_hover.svg");
 }
 
 #toMasters_search__btn:hover{
     cursor: not-allowed;
-    background-color: #9590B6;
-}
-#toProfile__btn:hover{
-    cursor: not-allowed;
-    background-color: #9590B6;
+    color: #898989;
 }
 #toCalendar__btn:hover{
     cursor: not-allowed;
-    background-color: #9590B6;
+    color: #898989;
+}
+
+
+#toProfile__btn img{
+    position: absolute;
+    right: 1vw;
+    height: 40%;
+    opacity: 1;
+    transition:  opacity 0.3s;
+
+}
+
+#toProfile__btn img:hover{
+    opacity: 0.6;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
 

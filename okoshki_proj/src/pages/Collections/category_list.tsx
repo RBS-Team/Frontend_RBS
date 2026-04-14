@@ -6,12 +6,12 @@ import {useNavigate} from "react-router-dom";
 export default function Category_list({categories}) {
     const navigate = useNavigate();
 
-    const onPress = () => {
-        navigate("/categories/id");
+    const onPress = (id : string) => {
+        navigate(`/categories/${id}`);
     }
     return (
         <div className="block__category_speactialist__all_blocks">
-        {categories.slice(0, 4).map((category) => (
+        {categories.slice(0, 4).map((category : object) => (
                 <div className="block__category_speactialist__block" key={category.id}>
                     <div className="block__category__card_info">
                         <div className="block__category__card_info__main">
@@ -19,11 +19,11 @@ export default function Category_list({categories}) {
                                 {category.name}
                             </h1>
                             <p className="category_speactialist__amount">
-                                Найдено 12+ тыс. специалистов
-                                неподалеку от вас [Замокано]
+                                {category.description}
                             </p>
                         </div>
-                        <button className="block__search_speacialist__submit" onClick={onPress}>
+                        <button className="block__search_speacialist__submit" onClick={() => onPress(category.id)}
+                        >
                             <p>Подробнее</p>
                             <img src={arrow} alt=""/>
                         </button>
