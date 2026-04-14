@@ -33,7 +33,9 @@ export async function apiFetch<T = any>(
     options: ApiFetchOptions = {},
     raw = false
 ): Promise<ApiFetchResult<T> | Response> {
-    if (!(options?.method in safeMethods)) {
+    const isSafeMethod = options.method && options.method in safeMethods;
+    const isAuthEndpoint = url.includes('/login') || url.includes('/register');
+    if (!isSafeMethod && !isAuthEndpoint) {
         await fetchCSRFToken();
     }
 

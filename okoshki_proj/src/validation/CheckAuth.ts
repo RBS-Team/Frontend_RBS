@@ -1,10 +1,17 @@
 export interface AuthData {
     email: string;
     password: string;
+    role: string;
+}
+
+export interface MasterData{
+    name: string;
+    bio: string;
+    timezone: string;
 }
 
 export interface ServerError {
-    type: 'invalid_credentials' | 'user_not_found' | 'email_not_confirmed' | 'too_many_attempts' | 'server_error';
+    type: 'invalid_credentials' | 'user_not_found' | 'email_not_confirmed' | 'too_many_attempts' | 'server_error' | 'resource_conflict';
     message: string;
     field?: 'email' | 'password';
 }
@@ -43,15 +50,32 @@ export function validateAuth(data: AuthData) {
     return errors;
 }
 
+
+export function validateCreateMaster(data: MasterData) {
+    const errors: Partial<MasterData> = {};
+
+    if (data.userName) {
+        if (data.userName.length > 200) {
+            errors.userName = "Имя должно содержать менее 200 символов";
+        }
+
+        if (data.userName.length <= 1) {
+            errors.userName = "Имя должно более 1 символа";
+        }
+    }
+
+    return errors;
+}
+
 export function handleServerError(error: any): ServerError {
     const defaultError: ServerError = {
         type: 'server_error',
         message: 'Произошла ошибка на сервере. Попробуйте позже.'
     };
-
     if (error.response) {
         const status = error.response.status;
         const data = error.response.data;
+        console.log(error.status);
 
         switch (status) {
             case 401:
@@ -67,16 +91,12 @@ export function handleServerError(error: any): ServerError {
                     message: 'Пользователь с таким email не найден',
                     field: 'email'
                 };
-
-            case 403:
-                if (data?.message?.includes('подтвердите email')) {
+            case 409:
                     return {
-                        type: 'email_not_confirmed',
-                        message: 'Подтвердите email перед входом. Проверьте почту',
+                        type: 'resource_conflict',
+                        message: 'Этот email уже занят',
                         field: 'email'
                     };
-                }
-                return defaultError;
 
             case 429:
                 return {

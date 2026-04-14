@@ -1,7 +1,7 @@
-import bg from "../../../static/imgs/Registration_background.svg";
-import star from "../../../static/imgs/star_auth.svg";
+import bg from "../../../../static/imgs/bg_masters_auth_right.jpg";
+import star from "../../../../static/imgs/star_auth.svg";
 import { useEffect, useState } from "react";
-import { apiFetch } from "../../../api/apiFetch.ts";
+import { apiFetch } from "../../../../api/apiFetch.ts";
 import { Link, useNavigate } from "react-router-dom";
 import {
     validateAuthOnSubmit,
@@ -9,18 +9,18 @@ import {
     handleServerError,
     mapServerErrorToValidation,
     type ServerError
-} from "../../../validation/CheckAuth.ts";
-import { useForm } from "../../../hooks/useForm.ts";
+} from "../../../../validation/CheckAuth.ts";
+import { useForm } from "../../../../hooks/useForm.ts";
 import { useDebounce } from "use-debounce";
 
 interface Props {
     onLogin: (user: any) => void;
 }
 
-export default function Registration({ onLogin }: Props) {
+export default function MastersRegistration({ onLogin }: Props) {
     const navigate = useNavigate();
     const { values, handleChange, handleSubmit } = useForm(
-        { email: "", password: "", role: "client" },
+        { email: "", password: "", role: "master" },
         validateAuth
     );
 
@@ -71,6 +71,7 @@ export default function Registration({ onLogin }: Props) {
             console.error("Registration error:", error);
 
             let serverErrorObj: ServerError;
+            console.log(error);
             if (error.response) {
                 serverErrorObj = handleServerError(error);
             } else if (error.request) {
@@ -102,12 +103,11 @@ export default function Registration({ onLogin }: Props) {
                         <div className="auth_info">
                             <img src={star} alt="star" className="auth__info_star"/>
                             <h1 className="auth__header">
-                                <span>С</span><span>о</span><span>з</span><span>д</span><span>а</span><span>т</span><span>ь</span>
+                                <span>С</span><span>Т</span><span>А</span><span>Н</span><span>Ь</span>
                                 <span>&nbsp;</span>
-                                <span>а</span><span>к</span><span>к</span><span>а</span><span>у</span><span>н</span><span>т</span>
+                                <span>М</span><span>А</span><span>С</span><span>Т</span><span>Е</span><span>Р</span><span>О</span><span>М</span>
                             </h1>
-                            <p className="auth__text">Мы соединяем тех, кто дарит красоту, и тех, кто её достоин.
-                                Присоединяйся!</p>
+                            <p className="auth__text">Мы соединяем тех, кто дарит красоту, и тех, кто её достоин. Присоединяйся!</p>
                         </div>
 
                         <form onSubmit={handleSubmit(onSubmit)} className="auth_reg_form">
@@ -164,11 +164,7 @@ export default function Registration({ onLogin }: Props) {
                             <button className="auth__btn_submit" type="submit">
                                 Создать аккаунт
                             </button>
-                            <div className="center-text">
-                                <Link to="/registration/master" className="goTo__link">
-                                    <p className="pre_link__text">Хочу стать</p> мастером!
-                                </Link>
-                            </div>
+
                         </form>
                     </div>
                 </div>

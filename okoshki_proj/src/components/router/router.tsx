@@ -4,6 +4,8 @@ import Registration from "../../pages/Authorization/Registration/Registration";
 import Collections from "../../pages/Collections/collections";
 import { useAuth } from "../../context/AuthContext";
 import MastersList from "../../pages/MastersList/masters_list.tsx";
+import MastersRegistration from "../../pages/Authorization/Masters/Registration/Registration";
+import MasterProfile from "../../pages/Profile/Master/profile_master";
 
 export default function AppRouter() {
     const { user, login, loading } = useAuth();
@@ -21,13 +23,24 @@ export default function AppRouter() {
                 element={!user ? <Registration onLogin={login} /> : <Navigate to="/" replace />}
             />
             <Route
-                path="/categories/id"
-                element={user ? <MastersList /> : <Navigate to="/login" replace />}
+                path="/registration/master"
+                element={!user ? <MastersRegistration onLogin={login} /> : <Navigate to="/" replace />}
             />
             <Route
-                path="/*"
-                element={user ? <Collections /> : <Navigate to="/login" replace />}
+                path="/categories/:id"
+                element={user ? <MastersList /> : <Navigate to="/registration" replace />}
             />
+            <Route
+                path="/profile"
+                element={user ? <MasterProfile /> : <Navigate to="/registration" replace />}
+            />
+
+            <Route
+                path="/*"
+                element={user ? <Collections /> : <Navigate to="/registration" replace />}
+            />
+
+
         </Routes>
     );
 }

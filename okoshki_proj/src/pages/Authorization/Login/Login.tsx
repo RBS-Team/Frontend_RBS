@@ -49,7 +49,7 @@ export default function Login({ onLogin }: LoginProps) {
             });
 
             if (res.ok) {
-                onLogin({ id: res.data.id });
+                onLogin({ id: res.data.id, role: res.data.role });
                 navigate("/");
             } else {
                 const errorForHandler = {
@@ -112,7 +112,6 @@ export default function Login({ onLogin }: LoginProps) {
                         </div>
 
                         <form onSubmit={handleSubmit(onSubmit)} className="auth_login_form">
-                            {/* Отображение общей серверной ошибки */}
                             {serverError && (
                                 <div className="server-error" style={{ marginBottom: "15px" }}>
                                     <p className="showError" style={{ color: "red", fontSize: "14px" }}>
