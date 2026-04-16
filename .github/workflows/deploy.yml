@@ -3,7 +3,7 @@ name: Build and Deploy Frontend
 on:
   push:
     branches:
-      -main
+      - main
 
 jobs:
   build-and-deploy:
@@ -31,5 +31,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           source: "dist/*"
-          target: "home/ubuntu/projects/frontend_okoshki"
+          target: "/home/ubuntu/projects/frontend_okoshki"
           strip_components: 1
