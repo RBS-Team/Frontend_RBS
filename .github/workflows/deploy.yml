@@ -8,6 +8,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: okoshki_proj
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +34,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: "dist/*"
+          source: "okoshki_proj/dist/*"
           target: "/home/ubuntu/projects/frontend_okoshki"
-          strip_components: 1
+          strip_components: 2
