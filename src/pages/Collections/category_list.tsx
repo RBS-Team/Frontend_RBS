@@ -1,0 +1,34 @@
+import arrow from "../../static/imgs/arrow_right.svg";
+import {useNavigate} from "react-router-dom";
+
+
+
+export default function Category_list({categories}) {
+    const navigate = useNavigate();
+
+    const onPress = (id : string) => {
+        navigate(`/categories/${id}`);
+    }
+    return (
+        <div className="block__category_speactialist__all_blocks">
+        {categories.slice(0, 4).map((category : object) => (
+                <div className="block__category_speactialist__block" key={category.id}>
+                    <div className="block__category__card_info">
+                        <div className="block__category__card_info__main">
+                            <h1 className="category_speactialist__title">
+                                {category.name}
+                            </h1>
+                            <p className="category_speactialist__amount">
+                                {category.description}
+                            </p>
+                        </div>
+                        <button className="block__search_speacialist__submit" onClick={() => onPress(category.id)}
+                        >
+                            <p>Подробнее</p>
+                            <img src={arrow} alt=""/>
+                        </button>
+                    </div>
+                </div>))}
+        </div>);
+};
+
