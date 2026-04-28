@@ -6,10 +6,12 @@ import { useAuth } from "../../context/AuthContext";
 import MastersList from "../../pages/MastersList/masters_list.tsx";
 import MastersRegistration from "../../pages/Authorization/Masters/Registration/Registration";
 import MasterProfile from "../../pages/Profile/Master/profile_master";
+import MyServices from "../../pages/MyServices/my_services";
+import CreateServiceForm from "../../pages/CreateService/create_service.tsx";
+
 
 export default function AppRouter() {
     const { user, login, loading } = useAuth();
-
     if (loading) return null;
 
     return (
@@ -28,16 +30,24 @@ export default function AppRouter() {
             />
             <Route
                 path="/categories/:id"
-                element={user ? <MastersList /> : <Navigate to="/registration" replace />}
+                element={user ? <MastersList role={user.role}/> : <Navigate to="/registration" replace />}
             />
             <Route
                 path="/profile"
                 element={user ? <MasterProfile /> : <Navigate to="/registration" replace />}
             />
-
             <Route
                 path="/*"
                 element={user ? <Collections /> : <Navigate to="/registration" replace />}
+            />
+            <Route
+                path="/my-services"
+                element={user ? <MyServices role={user.role}/> : <Navigate to="/registration" replace />}
+            />
+
+            <Route
+                path="/my-services/create"
+                element={user ? <CreateServiceForm/> : <Navigate to="/registration" replace />}
             />
 
 

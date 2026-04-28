@@ -1,14 +1,12 @@
 import Menu from "../../components/menu/menu.tsx"
-// import arrow from "../../static/imgs/arrow_right.svg";
 import {useEffect, useState} from "react";
-import arrow from "../../static/imgs/arrow_right.svg";
-import avatar from "../../static/imgs/images.jpg"
 import {useNavigate, useParams} from "react-router-dom";
 import {apiFetch} from "../../api/apiFetch";
 import Services_list from "./master_list";
+import YandexMapComponent, {Map} from "../../components/map/map";
 // import {apiFetch} from "../../api/apiFetch.ts";
 
-export default function MastersList() {
+export default function MastersList(role : string) {
     const [services, setService] = useState([]);
     const navigate = useNavigate();
     const { id } = useParams();
@@ -31,11 +29,10 @@ export default function MastersList() {
 
     return (
         <div className="masters-list">
-            <Menu/>
+            <Menu role={role}/>
             <div className="masters-list-sections">
                 <div className="right_section" id="masters-list-section">
                     <div className="masters-list__right_section__up">
-                        <h1 className="collect__login" id="h1__color_blue">Результаты поиска</h1>
                         <div className="filters">
                             <div className="filter-block">
                                 <p className="filter__title">Маникюр</p>
@@ -58,6 +55,7 @@ export default function MastersList() {
                 </div>
                 <div className="left-section">
                     <div className="maps-block">
+                        <YandexMapComponent />
                     </div>
                 </div>
             </div>

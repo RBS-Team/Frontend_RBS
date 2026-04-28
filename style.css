@@ -5,6 +5,8 @@
 @import "src/pages/MastersList/masters_list.css";
 @import "src/components/meeting_master_form/meeting.css";
 @import "src/pages/Profile/Master/profile_master.css";
+@import "src/pages/MyServices/my_services.css";
+@import "src/pages/CreateService/create_service.css";
 
 @font-face {
     font-family: 'Montserrat';
