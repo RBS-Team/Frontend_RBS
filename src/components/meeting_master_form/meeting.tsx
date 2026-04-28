@@ -36,7 +36,6 @@ export default function MeetingMasterForm({ role }: MeetingProps) {
         // }
 
         try {
-            console.log(data);
             const res = await apiFetch("/masters", {
                 method: "POST",
                 body: JSON.stringify(data),
@@ -44,6 +43,7 @@ export default function MeetingMasterForm({ role }: MeetingProps) {
 
             if (res.ok) {
                 setIsVisible(false);
+                localStorage.setItem("master_id", res.data.id);
             } else {
                 const errorForHandler = {
                     response: {
@@ -51,7 +51,6 @@ export default function MeetingMasterForm({ role }: MeetingProps) {
                         data: res.data
                     }
                 };
-
                 const serverErrorObj = handleServerError(errorForHandler);
                 const mappedErrors = mapServerErrorToValidation(serverErrorObj);
                 if (Object.keys(mappedErrors).length > 0) {

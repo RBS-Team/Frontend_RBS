@@ -22,14 +22,10 @@ export default function Collections() {
 
     const user = localStorage.getItem("user");
     const roleName = JSON.parse(user).role;
-
-
-
-
     return (
         <div className="screen">
             <div className="collections">
-                <Menu/>
+                <Menu role={roleName}/>
                 <div className="right_section">
                     <div className="block__search_speacialist">
                         <div className="block__search_speacialist__info">
