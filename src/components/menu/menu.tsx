@@ -1,74 +1,114 @@
-import logo from "../../static/imgs/logo.svg";
-import profile_def from "../../static/imgs/profile_btn_def.svg";
-import { useAuth } from "../../context/AuthContext";
-import {Navigate, useNavigate} from "react-router-dom";
+import { LogIn, UserPlus, UserIcon, LogOut } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import {apiFetch} from "../../api/apiFetch";
 
-interface MenuProps {
-    role: string;
+// Определяем интерфейс пользователя
+interface User {
+    email?: string;
+    [key: string]: any;
 }
 
-export default function Menu({ role }: MenuProps) {
-    const { logout, user } = useAuth();
+interface HeaderProps {
+    onMasterRegisterClick?: () => void;
+    onLoginClick?: () => void;
+    user?: User | null; // Пользователь может быть null
+    onProfileClick?: () => void;
+    onLogout?: () => void;
+}
 
+export function Menu({ onLoginClick, user: initialUser, onProfileClick }: HeaderProps = {}) {
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        <Navigate to="/login" replace />
+    const [currentUser, setCurrentUser] = useState<User | null | undefined>(initialUser);
+
+    useEffect(() => {
+        setCurrentUser(initialUser);
+    }, [initialUser]);
+
+    const onMasterRegClick = () => {
+        navigate("/master/register");
     };
 
-    const handleMain = () => {
+    const onSmartSearchClick = () => {
+        navigate("/smart-search");
+    };
+
+    const onServiceClick = () => {
+        navigate("/services");
+    }
+
+    const handleLogout = async () => {
+        localStorage.removeItem('user');
+        setCurrentUser(null);
+        const res = await apiFetch("/logout", {method: "POST"});
+        console.log(res)
         navigate("/");
     };
 
-    const handleProfile = () => {
-        navigate("/profile");
-    }
-
-    const handleMyServices = () => {
-        navigate("/my-services");
-    };
-
-    const isMaster = role === "master";
-
-
-    if (!isMaster) return (
-        <div className="menu">
-            <img src={logo} alt="logo" className="logo"/>
-            <div className="menu__sections">
-                <button className="section__btn" id="toMasters_collection__btn" onClick={handleMain}>
-                    <p>Главная</p>
-                </button>
-                <button className="section__btn" id="toMasters_search__btn">
-                    <p>Найти мастера</p>
-                </button>
-                <button className="section__btn" id="toCalendar__btn">
-                    <p>Мои записи</p>
-                </button>
-                <button className="section__btn" id="toProfile__btn" onClick={handleProfile}>
-                    <img src={profile_def} alt=""/>
-                </button>
-            </div>
-        </div>
-    );
-
     return (
-            <div className="menu">
-                <img src={logo} alt="logo" className="logo"/>
-                <div className="menu__sections">
-                    <button className="section__btn" id="toMasters_collection__btn" onClick={handleMain}>
-                        <p>Главная</p>
-                    </button>
-                    <button className="section__btn" id="toMasters_search__btn" onClick={handleMyServices}>
-                        <p>Мои услуги</p>
-                    </button>
-                    <button className="section__btn" id="toCalendar__btn">
-                        <p>Календарь</p>
-                    </button>
-                    <button className="section__btn" id="toProfile__btn" onClick={handleProfile}>
-                        <img src={profile_def} alt=""/>
-                    </button>
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                    {/* Логотип */}
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+                        <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg"></div>
+                        <span className="text-xl font-semibold">Okoshki</span>
+                    </div>
+
+                    {/* Навигация */}
+                    <nav className="hidden md:flex items-center gap-8">
+                        <button onClick={onServiceClick} className="text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
+                            Услуги
+                        </button>
+                        <button onClick={onSmartSearchClick} className="text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
+                            Умный поиск
+                        </button>
+                        <button onClick={onMasterRegClick} className="text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
+                            Для специалистов
+                        </button>
+                    </nav>
+
+                    {/* Блок авторизации */}
+                    <div className="flex items-center gap-3">
+                        {currentUser ? (
+                            <>
+                                <button
+                                    onClick={onProfileClick}
+                                    className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                                >
+                                    <UserIcon size={18} />
+                                    {currentUser.id || 'Профиль'}
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-red-50 cursor-pointer rounded-lg transition-colors"
+                                >
+                                    <LogOut size={18} />
+                                    Выйти
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={onLoginClick}
+                                    className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                                >
+                                    <LogIn size={18} />
+                                    Войти
+                                </button>
+                                <button
+                                    onClick={onLoginClick}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity"
+                                >
+                                    <UserPlus size={18} />
+                                    Регистрация
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
+        </header>
     );
 }

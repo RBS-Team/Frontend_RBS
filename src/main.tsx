@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import "../style.css";
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
