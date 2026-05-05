@@ -1,55 +1,43 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "../../pages/Authorization/Login/Login";
-import Registration from "../../pages/Authorization/Registration/Registration";
+import {Routes, Route, Navigate, useNavigate} from "react-router-dom";
 import Collections from "../../pages/Collections/collections";
 import { useAuth } from "../../context/AuthContext";
-import MastersList from "../../pages/MastersList/masters_list.tsx";
-import MastersRegistration from "../../pages/Authorization/Masters/Registration/Registration";
-import MasterProfile from "../../pages/Profile/Master/profile_master";
-import MyServices from "../../pages/MyServices/my_services";
-import CreateServiceForm from "../../pages/CreateService/create_service.tsx";
+import {MasterRegistration} from "../master/MasterRegistration";
+import {PrivateRoute} from "./privateRoute";
+import {MasterDashboard} from "../master/MasterDashboard";
+import {SmartSearch} from "../SmartSearch/SmartSearch";
+import {CategoriesView} from "../CategoryViews/CategoryViews";
+import {CategoryMasters} from "../CategoryMasters/CategoryMasters";
 
 
 export default function AppRouter() {
-    const { user, login, loading } = useAuth();
+    const { user, loading } = useAuth();
     if (loading) return null;
-
     return (
         <Routes>
-            <Route
-                path="/login"
-                element={!user ? <Login onLogin={login} /> : <Navigate to="/" replace />}
-            />
-            <Route
-                path="/registration"
-                element={!user ? <Registration onLogin={login} /> : <Navigate to="/" replace />}
-            />
-            <Route
-                path="/registration/master"
-                element={!user ? <MastersRegistration onLogin={login} /> : <Navigate to="/" replace />}
-            />
-            <Route
-                path="/categories/:id"
-                element={user ? <MastersList role={user.role}/> : <Navigate to="/registration" replace />}
-            />
-            <Route
-                path="/profile"
-                element={user ? <MasterProfile /> : <Navigate to="/registration" replace />}
-            />
-            <Route
-                path="/*"
-                element={user ? <Collections /> : <Navigate to="/registration" replace />}
-            />
-            <Route
-                path="/my-services"
-                element={user ? <MyServices role={user.role}/> : <Navigate to="/registration" replace />}
-            />
 
-            <Route
-                path="/my-services/create"
-                element={user ? <CreateServiceForm/> : <Navigate to="/registration" replace />}
-            />
+            <Route path="/" element={<Collections />} />
+            <Route path="/category/:id" element={<CategoryMasters />} />
 
+
+            <Route path="/master/dashboard" element={
+                <PrivateRoute user={user} loading={loading}>
+                <MasterDashboard/>
+                </PrivateRoute>
+            }/>
+
+            <Route path="/smart-search" element={
+                    <SmartSearch/>
+            }/>
+
+            <Route path="/services" element={
+                <CategoriesView/>
+            }/>
+
+            <Route path="/master/register" element={
+                    <MasterRegistration />
+            }/>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
     );
