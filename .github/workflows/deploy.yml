@@ -33,3 +33,4 @@ jobs:
           source: "dist/*"
           target: "/home/ubuntu/projects/frontend_okoshki"
           strip_components: 1
+
