@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MasterCard } from '../MasterCard/MasterCard';
 import {useNavigate, useParams} from "react-router-dom";
 import {apiFetch} from "../../api/apiFetch";
+import {MapComponent} from "../VK_Maps/map";
 
 interface Master {
     name: string;
@@ -401,20 +402,8 @@ export function CategoryMasters({ categoryTitle, onBookClick }: CategoryMastersP
                     )
                 ) : (
                     <div className="flex items-center justify-center h-[calc(100vh-280px)] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                        <div className="text-center px-6 py-12 max-w-md">
-                            <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <MapIcon className="text-white" size={40} />
-                            </div>
-                            <h3 className="mb-2">Карта в разработке</h3>
-                            <p className="text-gray-600 mb-6">
-                                Функция просмотра мастеров на карте скоро будет доступна. Пока используйте режим списка для поиска мастеров.
-                            </p>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity"
-                            >
-                                Вернуться к списку
-                            </button>
+                        <div className="w-full h-full">
+                            <MapComponent />
                         </div>
                     </div>
                 )}
