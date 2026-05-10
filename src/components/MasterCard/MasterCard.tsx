@@ -27,8 +27,8 @@ export function MasterCard({
             <div className="relative aspect-[3/4]">
                 <img
                     // src={imageUrl}
-                    src="https://images.unsplash.com/photo-1763048208932-cbe149724374?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-                    alt={master.name}
+                    // src="https://images.unsplash.com/photo-1763048208932-cbe149724374?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+                    // alt={master.name}
                     className="w-full h-full object-cover"
                 />
                 {isVerified && (
