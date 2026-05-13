@@ -12,7 +12,7 @@ interface User {
 interface HeaderProps {
     onMasterRegisterClick?: () => void;
     onLoginClick?: () => void;
-    user?: User | null; // Пользователь может быть null
+    user?: User | null;
     onProfileClick?: () => void;
     onLogout?: () => void;
 }
@@ -21,13 +21,17 @@ export function Menu({ onLoginClick, user: initialUser, onProfileClick }: Header
     const navigate = useNavigate();
 
     const [currentUser, setCurrentUser] = useState<User | null | undefined>(initialUser);
-
+    console.log(currentUser);
     useEffect(() => {
         setCurrentUser(initialUser);
     }, [initialUser]);
 
     const onMasterRegClick = () => {
-        navigate("/master/register");
+        if(currentUser?.role === "master") {
+            navigate("/master/dashboard");
+        } else{
+            navigate("/master/register");
+        }
     };
 
     const onSmartSearchClick = () => {
@@ -39,10 +43,19 @@ export function Menu({ onLoginClick, user: initialUser, onProfileClick }: Header
     }
 
     const handleLogout = async () => {
-        localStorage.removeItem('user');
+        await apiFetch("/logout", {method: "POST"});
         setCurrentUser(null);
-        const res = await apiFetch("/logout", {method: "POST"});
-        console.log(res)
+        localStorage.removeItem("user")
+        await apiFetch("/guest/session", {
+            method: 'POST',
+        })
+            .then(res => {
+                if (res.ok) {
+                    setCurrentUser(res.data);
+                } else {
+                    console.error(res);
+                }
+            }).catch(console.error);
         navigate("/");
     };
 
@@ -71,14 +84,14 @@ export function Menu({ onLoginClick, user: initialUser, onProfileClick }: Header
 
                     {/* Блок авторизации */}
                     <div className="flex items-center gap-3">
-                        {currentUser ? (
+                        {currentUser?.role==="client" || currentUser?.role==="master"  ? (
                             <>
                                 <button
                                     onClick={onProfileClick}
                                     className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                                 >
                                     <UserIcon size={18} />
-                                    {currentUser.id || 'Профиль'}
+                                    {currentUser.name || 'Профиль'}
                                 </button>
                                 <button
                                     onClick={handleLogout}

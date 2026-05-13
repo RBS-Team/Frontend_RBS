@@ -1,46 +1,21 @@
 import { Star, MapPin, Check } from 'lucide-react';
 
 interface MasterCardProps {
-    name: string;
-    specialty: string;
-    imageUrl: string;
-    rating: number;
-    reviews: number;
-    location: string;
-    priceFrom: number;
-    isVerified?: boolean;
-    onBookClick?: () => void;
-    master: object;
-    title: string;
-}
-
-export function MasterCard({
-                               master,
-                               title,
-                               location,
-                               price,
-                               isVerified = false,
-                               onBookClick
-                           }: MasterCardProps) {
+    master: any;
+    onBookClick?: (master: any) => void; // Изменяем тип
+}export function MasterCard({ master, onBookClick }: MasterCardProps) {
     return (
         <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer">
             <div className="relative aspect-[3/4]">
                 <img
-                    // src={imageUrl}
-                    // src="https://images.unsplash.com/photo-1763048208932-cbe149724374?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-                    // alt={master.name}
+                    src={master?.avatar_url}
                     className="w-full h-full object-cover"
                 />
-                {isVerified && (
-                    <div className="absolute top-3 right-3 bg-green-500 text-white rounded-full p-1">
-                        <Check size={16} />
-                    </div>
-                )}
             </div>
 
             <div className="p-4">
-                <h3 className="mb-1">{master.name}</h3>
-                <p className="text-gray-600 text-sm mb-3">{title}</p>
+                <h3 className="mb-1">{master.first_name + ' ' + master.last_name}</h3>
+                <p className="text-gray-600 text-sm mb-3">{master.bio}</p>
 
                 <div className="flex items-center gap-2 mb-2">
                     <div className="flex items-center gap-1">
@@ -52,16 +27,16 @@ export function MasterCard({
 
                 <div className="flex items-center gap-1 text-gray-600 text-sm mb-3">
                     <MapPin size={14} />
-                    <span>{location}</span>
+                    <span>{master.address}</span>
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <div>
                         <span className="text-gray-500 text-sm">от </span>
-                        <span className="text-lg">{price} ₽</span>
+                        <span className="text-lg">{master.review_count} ₽</span>
                     </div>
                     <button
-                        onClick={onBookClick}
+                        onClick={() => {onBookClick?.(master)}}
                         className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors text-sm"
                     >
                         Записаться

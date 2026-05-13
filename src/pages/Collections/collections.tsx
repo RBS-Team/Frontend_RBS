@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Menu } from '../../components/menu/menu.tsx';
 import { HeroSection } from '../../components/HeroSection/HeroSection';
 import { CategoryCard } from '../../components/CategoryCard/CategoryCard';
-import { MasterCard } from '../../components/MasterCard/MasterCard';
 import { BookingModal } from '../../components/BookingModal/BookingModal';
 import { HowItWorks } from '../../components/HowItWorks/HowItWorks';
 import { TestimonialCard } from '../../components/TestimonialCard/TestimonialCard';
@@ -50,10 +49,30 @@ export default function collections() {
 
 
         const savedUser = localStorage.getItem('user');
+        console.log(savedUser, "itsnsfsf");
         if (savedUser) {
             setUser(JSON.parse(savedUser));
+        } else {
+            apiFetch("/guest/session", {
+                method: 'POST',
+            })
+                .then(res => {
+                    if (res.ok) {
+                        const guest = res.data;
+                        setUser(guest);
+                    } else {
+                        console.error(res);
+                    }
+                })
+                .catch(console.error);
         }
     }, []);
+
+    const handleAdminBlock = () =>{
+        localStorage.setItem("IsAdmin", "true");
+        console.log(localStorage.getItem("IsAdmin"));
+        navigate('/admin/dashboard');
+    }
 
     const handleOnboardingComplete = () => {
         localStorage.setItem('hasSeenOnboarding', 'true');
@@ -82,7 +101,6 @@ export default function collections() {
     //         setSelectedMaster(master);
     //     }
     // };
-
 
     useEffect(() => {
         apiFetch("/categories")
@@ -291,7 +309,13 @@ export default function collections() {
                 user={user}
                 onLogout={handleLogout}
                 onLoginClick={() => setShowAuthModal(true)}
-                onProfileClick={() => setShowUserProfile(true)}
+                onProfileClick={() => {
+                    if(user.role === "master"){
+                        navigate("/master/dashboard");
+                    } else {
+                        setShowUserProfile(true);
+                    }
+                }}
             />
             <HeroSection />
 
@@ -323,7 +347,7 @@ export default function collections() {
                 </div>
             </section>
 
-            <PopularCities />
+            {/*<PopularCities />*/}
 
             <section className="py-16 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -392,6 +416,12 @@ export default function collections() {
                                 <li><a href="#" className="hover:text-white">О нас</a></li>
                                 <li><a href="#" className="hover:text-white">Контакты</a></li>
                                 <li><a href="#" className="hover:text-white">Вакансии</a></li>
+                                <button
+                                    onClick={() => handleAdminBlock()}
+                                    className="hover:text-white text-left transition-colors"
+                                >
+                                    🔐 Админ-панелs
+                                </button>
                             </ul>
                         </div>
                     </div>

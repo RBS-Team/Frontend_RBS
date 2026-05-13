@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Calendar, Briefcase, Image as ImageIcon, Settings, BarChart3, Star, LogOut } from 'lucide-react';
+import { Calendar, Briefcase, Image as ImageIcon, Settings, BarChart3, Star, LogOut, X } from 'lucide-react';
 import { ServiceManager } from './ServiceManager';
 import { PortfolioManager } from './PortfolioManager';
 import { BookingsManager } from './BookingManager';
 import { ReviewsManager } from './ReviewsManager';
+import {useNavigate} from "react-router-dom";
 
 interface MasterDashboardProps {
     onLogout?: () => void;
@@ -12,12 +13,18 @@ interface MasterDashboardProps {
 export function MasterDashboard({ onLogout }: MasterDashboardProps) {
     const [activeSection, setActiveSection] = useState<'overview' | 'services' | 'portfolio' | 'bookings' | 'reviews'>('overview');
 
+    const navigate = useNavigate();
+
+    const onClose = () => {
+        navigate(-1);
+    }
     const stats = [
         { label: 'Записей сегодня', value: '8', icon: Calendar, color: 'bg-blue-100 text-blue-600' },
         { label: 'Услуг', value: '12', icon: Briefcase, color: 'bg-green-100 text-green-600' },
         { label: 'Работ в портфолио', value: '24', icon: ImageIcon, color: 'bg-purple-100 text-purple-600' },
         { label: 'Доход за месяц', value: '₽156 000', icon: BarChart3, color: 'bg-pink-100 text-pink-600' }
     ];
+
 
     const upcomingBookings = [
         { time: '10:00', client: 'Мария Иванова', service: 'Стрижка', duration: '60 мин' },
@@ -43,8 +50,8 @@ export function MasterDashboard({ onLogout }: MasterDashboardProps) {
                             <p className="text-gray-600">Анна Петрова</p>
                         </div>
                         <div className="flex gap-2">
-                            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                <Settings size={24} />
+                            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <X size={24} />
                             </button>
                             {onLogout && (
                                 <button

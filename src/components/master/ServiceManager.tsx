@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { Plus, Edit, Trash2, X, Clock, Calendar } from 'lucide-react';
+import {apiFetch} from "../../api/apiFetch";
 
 interface ServiceSchedule {
     day: string;
@@ -27,32 +28,52 @@ const defaultSchedule: ServiceSchedule[] = [
 ];
 
 export function ServiceManager() {
-    const [services, setServices] = useState<Service[]>([
-        {
-            id: '1',
-            name: 'Стрижка женская',
-            duration: 60,
-            price: 3500,
-            description: 'Классическая стрижка',
-            schedule: defaultSchedule
-        },
-        {
-            id: '2',
-            name: 'Окрашивание',
-            duration: 120,
-            price: 8000,
-            description: 'Полное окрашивание волос',
-            schedule: defaultSchedule
-        },
-        {
-            id: '3',
-            name: 'Укладка',
-            duration: 45,
-            price: 2500,
-            description: 'Профессиональная укладка',
-            schedule: defaultSchedule
-        }
-    ]);
+    // const [services, setServices] = useState<Service[]>([
+    //     {
+    //         id: '1',
+    //         name: 'Стрижка женская',
+    //         duration: 60,
+    //         price: 3500,
+    //         description: 'Классическая стрижка',
+    //         schedule: defaultSchedule
+    //     },
+    //     {
+    //         id: '2',
+    //         name: 'Окрашивание',
+    //         duration: 120,
+    //         price: 8000,
+    //         description: 'Полное окрашивание волос',
+    //         schedule: defaultSchedule
+    //     },
+    //     {
+    //         id: '3',
+    //         name: 'Укладка',
+    //         duration: 45,
+    //         price: 2500,
+    //         description: 'Профессиональная укладка',
+    //         schedule: defaultSchedule
+    //     }
+    // ]);
+
+    const [services, setServices] = useState([]);
+    const user = JSON.parse(localStorage.getItem("user"));
+    useEffect(() => {
+        const id = user?.master_id;
+        console.log(id);
+        apiFetch(`/masters/${id}/services`)
+            .then(res => {
+                if (res.ok) {
+                    setServices(res.data);
+                } else {
+                    console.error(res);
+                }
+            })
+            .catch(console.error);
+    }, []);
+
+    console.log(services);
+
+
     const [isAddingService, setIsAddingService] = useState(false);
     const [editingService, setEditingService] = useState<Service | null>(null);
     const [formData, setFormData] = useState({

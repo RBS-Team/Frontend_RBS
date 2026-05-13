@@ -1,0 +1,42 @@
+.custom-marker {
+    width: 56px;
+    height: 56px;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.custom-marker .marker-body {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.2s ease;
+    transform-origin: bottom center;
+    will-change: transform;
+}
+
+/* Безопасное увеличение при наведении */
+.custom-marker:hover .marker-body {
+    transform: scale(1.1);
+}
+
+/* Подъем слоя при наведении */
+.custom-marker:hover {
+    z-index: 999 !important;
+}
+
+/* Системный класс ядра карты — возвращаем дефолты библиотеки */
+.mmrgl-marker {
+    position: absolute !important;
+    background: transparent !important; /* Убираем red, если остался */
+}
+
+.mmrgl-ctrl-attrib {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+.mmrgl-ctrl-attrib:hover {
+    opacity: 1;
+}
