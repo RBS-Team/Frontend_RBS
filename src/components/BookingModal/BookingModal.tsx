@@ -1,22 +1,31 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { X, Calendar, Clock, ChevronLeft, ChevronRight, Check, Star, Image as ImageIcon } from 'lucide-react';
+import {apiFetch} from "../../api/apiFetch";
 
 interface BookingModalProps {
-    masterName: string;
-    masterImage: string;
-    specialty: string;
-    portfolio: string[];
-    rating: number;
-    reviews: number;
+    master: any;
     onClose: () => void;
 }
 
-export function BookingModal({ masterName, masterImage, specialty, portfolio, rating, reviews, onClose }: BookingModalProps) {
+export function BookingModal({ master, onClose }: BookingModalProps) {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [selectedService, setSelectedService] = useState<string>('');
     const [selectedPortfolioImage, setSelectedPortfolioImage] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'portfolio' | 'booking'>('portfolio');
+    const [realServices, setRealServices] = useState<string | null>(null);
+    useEffect(() => {
+        apiFetch(`/masters/${master.id}/services`)
+            .then(res => {
+                if (res.ok) {
+                    setRealServices(res.data);
+                } else {
+                    console.error(res);
+                }
+            })
+            .catch(console.error);
+    }, []);
+    console.log(realServices,);
 
     const services = [
         {
@@ -102,7 +111,11 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
 
     const selectedServiceData = services.find(s => s.id === selectedService);
     const canBook = selectedService && selectedTime;
-
+    console.log(selectedService);
+    console.log(selectedTime);
+    console.log(selectedDate);
+    console.log(selectedServiceData);
+    console.log(canBook, "asfd");
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -119,19 +132,19 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
                 <div className="p-6">
                     <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
                         <img
-                            src={masterImage}
-                            alt={masterName}
+                            src={master.avatar_url}
+                            alt={master.name}
                             className="w-20 h-20 rounded-full object-cover"
                         />
                         <div className="flex-1">
-                            <h3>{masterName}</h3>
-                            <p className="text-gray-600">{specialty}</p>
+                            <h3>{master.name}</h3>
+                            <p className="text-gray-600">{master.bio}</p>
                             <div className="flex items-center gap-2 mt-2">
                                 <div className="flex items-center gap-1">
                                     <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                    <span className="text-sm">{rating}</span>
+                                    <span className="text-sm">{master.rating}</span>
                                 </div>
-                                <span className="text-gray-400 text-sm">({reviews} отзывов)</span>
+                                <span className="text-gray-400 text-sm">({master.rating} отзывов)</span>
                             </div>
                         </div>
                     </div>
@@ -173,27 +186,27 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
 
                     {activeTab === 'portfolio' ? (
                         <div>
-                            <h3 className="mb-4">Работы мастера ({portfolio.length})</h3>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
-                                {portfolio.map((image, index) => (
-                                    <div
-                                        key={index}
-                                        onClick={() => setSelectedPortfolioImage(image)}
-                                        className="aspect-square rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-md hover:shadow-lg"
-                                    >
-                                        <img
-                                            src={image}
-                                            alt={`Работа ${index + 1}`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                            {/*<h3 className="mb-4">Работы мастера ({portfolio.length})</h3>*/}
+                            {/*<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">*/}
+                            {/*    {portfolio.map((image, index) => (*/}
+                            {/*        <div*/}
+                            {/*            key={index}*/}
+                            {/*            onClick={() => setSelectedPortfolioImage(image)}*/}
+                            {/*            className="aspect-square rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-transform shadow-md hover:shadow-lg"*/}
+                            {/*        >*/}
+                            {/*            <img*/}
+                            {/*                src={image}*/}
+                            {/*                alt={`Работа ${index + 1}`}*/}
+                            {/*                className="w-full h-full object-cover"*/}
+                            {/*            />*/}
+                            {/*        </div>*/}
+                            {/*    ))}*/}
+                            {/*</div>*/}
                             <button
                                 onClick={() => setActiveTab('booking')}
                                 className="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:opacity-90 transition-opacity"
                             >
-                                Записаться к мастеру
+                                Посмотреть доступные слоты на запись
                             </button>
                         </div>
                     ) : (
@@ -202,7 +215,7 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
                             <div className="mb-8">
                                 <h3 className="mb-4">Выберите услугу</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {services.map((service) => (
+                                    {realServices?.map((service) => (
                                         <div
                                             key={service.id}
                                             onClick={() => {
@@ -216,7 +229,7 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
                                             }`}
                                         >
                                             <div className="flex justify-between items-start mb-2">
-                                                <span className="font-medium">{service.name}</span>
+                                                <span className="font-medium">{service.title}</span>
                                                 {selectedService === service.id && (
                                                     <div className="w-5 h-5 bg-pink-500 rounded-full flex items-center justify-center">
                                                         <Check size={14} className="text-white" />
@@ -224,12 +237,12 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
                                                 )}
                                             </div>
                                             <div className="flex justify-between text-sm text-gray-600 mb-2">
-                                                <span>{service.duration}</span>
+                                                <span>{service.duration_minutes} минут</span>
                                                 <span>{service.price} ₽</span>
                                             </div>
-                                            <div className="text-xs text-gray-500">
-                                                Доступно: {service.availableDays.join(', ')}
-                                            </div>
+                                            {/*<div className="text-xs text-gray-500">*/}
+                                            {/*    Доступно: {service.availableDays.join(', ')}*/}
+                                            {/*</div>*/}
                                         </div>
                                     ))}
                                 </div>
@@ -345,7 +358,7 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
                                         <div className="space-y-2 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">Услуга:</span>
-                                                <span>{selectedServiceData.name}</span>
+                                                <span>{selectedServiceData.title}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">Дата:</span>
@@ -363,7 +376,7 @@ export function BookingModal({ masterName, masterImage, specialty, portfolio, ra
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">Продолжительность:</span>
-                                                <span>{selectedServiceData.duration}</span>
+                                                <span>{selectedServiceData.duration_minutes} минут</span>
                                             </div>
                                             <div className="flex justify-between pt-2 border-t border-gray-200">
                                                 <span>Итого:</span>

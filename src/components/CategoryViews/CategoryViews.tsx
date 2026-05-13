@@ -122,8 +122,7 @@ export function CategoriesView() {
                         >
                             <div className="relative h-48 overflow-hidden">
                                 <img
-                                    // src={category.imageUrl}
-                                    src="https://images.unsplash.com/photo-1619367901998-73b3a70b3898?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+                                    src={category.avatar_url}
                                     alt={category.name}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
@@ -146,7 +145,7 @@ export function CategoriesView() {
                                         <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                                             👤
                                         </div>
-                                        <span>{/*category.mastersCount*/} 1924 мастеров</span>
+                                        <span>{category.masters_count} мастеров</span>
                                     </div>
 
                                     <button className="text-sm text-pink-600 hover:text-pink-700 flex items-center gap-1 group-hover:gap-2 transition-all">

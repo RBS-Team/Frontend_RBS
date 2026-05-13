@@ -5,37 +5,47 @@ import { MasterCard } from '../MasterCard/MasterCard';
 import {useNavigate, useParams} from "react-router-dom";
 import {apiFetch} from "../../api/apiFetch";
 import {MapComponent} from "../VK_Maps/map";
+import {BookingModal} from "../BookingModal/BookingModal";
 
-interface Master {
-    name: string;
-    specialty: string;
+interface masters {
+    id: string;
+    first_name: string;
+    last_name: string;
+    category_id: string;
     imageUrl: string;
     rating: number;
     reviews: number;
     location: string;
-    priceFrom: number;
+    price: number;
     isVerified: boolean;
     portfolio: string[];
     lat: number;
-    lng: number;
+    lon: number;
 }
 
 interface CategoryMastersProps {
     categoryTitle: string;
     onClose: () => void;
     onBack?: () => void;
-    onBookClick: (master: any) => void;
+    onBookClick: (masters: any) => void;
 }
 
-export function CategoryMasters({ categoryTitle, onBookClick }: CategoryMastersProps) {
+export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
     const [showFilters, setShowFilters] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
     const [priceRange, setPriceRange] = useState<'all' | 'low' | 'medium' | 'high'>('all');
     const [minRating, setMinRating] = useState(0);
     const [selectedCity, setSelectedCity] = useState('all');
     const [sortBy, setSortBy] = useState<'rating' | 'price' | 'reviews'>('rating');
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [selectedMaster, setSelectedMaster] = useState<any>(null);
 
-    const [services, setService] = useState([]);
+    const handleBookClick = (masters: any) => {
+        setSelectedMaster(masters);
+        setShowBookingModal(true);
+    };
+
+    const [masters, setMasters] = useState<masters[]>([]);
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -48,140 +58,20 @@ export function CategoryMasters({ categoryTitle, onBookClick }: CategoryMastersP
     }
 
     useEffect(() => {
-        apiFetch(`/categories/${id}/services`)
+        apiFetch(`/categories/${id}/masters`)
             .then(res => {
                 if (res.ok) {
-                    setService(res.data);
+                    setMasters(res.data);
                 } else {
                     console.error(res);
                 }
             })
             .catch(console.error);
-    }, []);
-
-
-
-
-    // const allMasters: Master[] = [
-    //     {
-    //         name: 'Анна Петрова',
-    //         specialty: 'Стилист-колорист',
-    //         imageUrl: 'https://images.unsplash.com/photo-1761839256791-6a93f89fb8b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //         rating: 4.9,
-    //         reviews: 156,
-    //         location: 'Москва, Центр',
-    //         priceFrom: 3500,
-    //         isVerified: true,
-    //         lat: 55.7558,
-    //         lng: 37.6173,
-    //         portfolio: [
-    //             'https://images.unsplash.com/photo-1638064432601-18b99cb31acb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1605980625458-21e4d9c29c4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1630695239920-4b5bb84a7c1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1574773004910-1eeaabb62b55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1605980625969-513c0d1f0c8d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1554519880-ffe46861d570?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1682450239611-e2c845970926?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1658322558683-2524c9b62d04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
-    //         ]
-    //     },
-    //     {
-    //         name: 'Мария Соколова',
-    //         specialty: 'Мастер маникюра',
-    //         imageUrl: 'https://images.unsplash.com/photo-1753285311550-154917dab783?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //         rating: 4.8,
-    //         reviews: 203,
-    //         location: 'Санкт-Петербург',
-    //         priceFrom: 2000,
-    //         isVerified: true,
-    //         lat: 59.9343,
-    //         lng: 30.3351,
-    //         portfolio: [
-    //             'https://images.unsplash.com/photo-1676926606566-58f2e00b592b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1690749138086-7422f71dc159?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1753285311550-154917dab783?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1737326376593-0eb74bff094e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1663229050022-ac26de6f05d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1605980625458-21e4d9c29c4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
-    //         ]
-    //     },
-    //     {
-    //         name: 'Елена Волкова',
-    //         specialty: 'Визажист',
-    //         imageUrl: 'https://images.unsplash.com/photo-1653130029149-9109b115ab9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //         rating: 5.0,
-    //         reviews: 89,
-    //         location: 'Москва, Арбат',
-    //         priceFrom: 4500,
-    //         isVerified: true,
-    //         lat: 55.7522,
-    //         lng: 37.5989,
-    //         portfolio: [
-    //             'https://images.unsplash.com/photo-1698181842119-a5283dea1440?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1723150512429-bfa92988d845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1698181842513-2179d5f8bc65?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1585261941042-5da0c5f1f0a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1653130029149-9109b115ab9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1574773004910-1eeaabb62b55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
-    //         ]
-    //     },
-    //     {
-    //         name: 'Дмитрий Морозов',
-    //         specialty: 'Барбер',
-    //         imageUrl: 'https://images.unsplash.com/photo-1761931403671-d020a14928d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //         rating: 4.9,
-    //         reviews: 178,
-    //         location: 'Москва, Сокол',
-    //         priceFrom: 2500,
-    //         isVerified: true,
-    //         lat: 55.8058,
-    //         lng: 37.5173,
-    //         portfolio: [
-    //             'https://images.unsplash.com/photo-1761931403671-d020a14928d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1759142016096-a9d1a5ebcc09?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1763048208932-cbe149724374?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1675034741473-afed58a142e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1707720531504-ce087725861a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1647462741351-4e7a5e7317c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
-    //         ]
-    //     },
-    //     {
-    //         name: 'Светлана Иванова',
-    //         specialty: 'Мастер бровей',
-    //         imageUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //         rating: 4.7,
-    //         reviews: 134,
-    //         location: 'Москва, Тверская',
-    //         priceFrom: 1800,
-    //         isVerified: true,
-    //         lat: 55.7658,
-    //         lng: 37.6073,
-    //         portfolio: [
-    //             'https://images.unsplash.com/photo-1653130029149-9109b115ab9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //             'https://images.unsplash.com/photo-1574773004910-1eeaabb62b55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
-    //         ]
-    //     },
-    //     {
-    //         name: 'Ольга Смирнова',
-    //         specialty: 'Косметолог',
-    //         imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    //         rating: 4.9,
-    //         reviews: 167,
-    //         location: 'Москва, Центр',
-    //         priceFrom: 5000,
-    //         isVerified: true,
-    //         lat: 55.7644,
-    //         lng: 37.6386,
-    //         portfolio: [
-    //             'https://images.unsplash.com/photo-1619367901998-73b3a70b3898?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
-    //         ]
-    //     }
-    // ];
+    }, [id]);
 
     const cities = ['Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург'];
 
-    let filteredMasters = [...services];
-    console.log(filteredMasters);
+    let filteredMasters = [...masters];
 
     if (minRating > 0) {
         filteredMasters = filteredMasters.filter(m => m.rating >= minRating);
@@ -206,6 +96,7 @@ export function CategoryMasters({ categoryTitle, onBookClick }: CategoryMastersP
         if (sortBy === 'reviews') return b.reviews - a.reviews;
         return 0;
     });
+
 
     return (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
@@ -386,28 +277,46 @@ export function CategoryMasters({ categoryTitle, onBookClick }: CategoryMastersP
                                     transition={{ delay: index * 0.05 }}
                                 >
                                     <MasterCard
-                                        {...master}
-                                        onBookClick={() => onBookClick({
-                                            name: master.master.name,
-                                            specialty: master.master.title,
-                                            imageUrl: master.imageUrl,
-                                            portfolio: master.portfolio,
-                                            rating: master.rating,
-                                            reviews: master.reviews
-                                        })}
+                                        master={master}
+                                        onBookClick={handleBookClick}
                                     />
                                 </motion.div>
                             ))}
                         </div>
                     )
                 ) : (
-                    <div className="flex items-center justify-center h-[calc(100vh-280px)] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                        <div className="w-full h-full">
-                            <MapComponent />
-                        </div>
+                    <div className="h-[calc(100vh-280px)] bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
+                        <MapComponent
+                            masters={filteredMasters.map((master) => ({
+                                id: master.id,
+                                name: `${master.first_name} ${master.last_name}`,
+                                specialty: master.bio,
+                                imageUrl: master.imageUrl || "https://cdn.profi.ru/xfiles/pfiles/b123b874d639411fa677612262614ad3.jpg-profi_a34-180.jpg",
+                                rating: master.rating,
+                                reviews: master.reviews,
+                                location: master.location,
+                                priceFrom: master.price,
+                                lat: master.lat,
+                                lng: master.lon
+                            }))}
+                            onMasterSelect={(selectedMapMaster) => {
+                                // Находим полного мастера по ID
+                                const fullMaster = filteredMasters.find(m => m.id === selectedMapMaster.id);
+                                if (fullMaster) {
+                                    handleBookClick(fullMaster);
+                                }
+                            }}
+                        />
                     </div>
                 )}
             </div>
+
+            {showBookingModal && selectedMaster && (
+                <BookingModal
+                    master={selectedMaster}
+                    onClose={() => setShowBookingModal(false)}
+                />
+            )}
         </div>
     );
 }

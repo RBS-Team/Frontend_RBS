@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles } from 'lucide-react';
 import {apiFetch} from "../../api/apiFetch";
+import {hasErrors, validateAuthForm} from "../../utils/validation";
 
 interface AuthModalProps {
     onClose: () => void;
-    onSuccess: (user: { id: string; email: string }) => void;
+    onSuccess: (user: { id: string; role: string; name: string}) => void;
 }
 
 type AuthMode = 'login' | 'register';
@@ -14,7 +15,25 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     const [mode, setMode] = useState<AuthMode>('login');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        password: ''
+    });
+
+    const validateForm = (): boolean => {
+        const newErrors = validateAuthForm(formData, mode);
+        setErrors(newErrors);
+        return !hasErrors(newErrors);
+    };
+
+    const updateField = (field: string, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        if (errors[field as keyof typeof errors]) {
+            setErrors(prev => ({ ...prev, [field]: '' }));
+        }
+    };
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -25,17 +44,18 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
-
+        if (validateForm()) {
         try {
             const url = mode === 'login'
-                ? '/client/login'
+                ? '/login'
                 : '/client/register';
 
             const payload =  mode !== 'login' ?{
                         email: formData.email,
                         password: formData.password,
-                        role: "client"
+                        first_name: formData.name,
+                        last_name: formData.name,
+                        phone: formData.phone,
                     } :
                 {email: formData.email,
                 password: formData.password
@@ -46,35 +66,31 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                 body: JSON.stringify(payload),
             });
 
-
-
-
             if (!res.ok) {
                 const data = await res.data;
                 throw new Error(data.message || 'Ошибка запроса');
             }
 
             const data = await res.data;
-
+            console.log(data);
 
             onSuccess({
                 id: data.id,
-                email: data.email,
+                role: data.role,
+                name: formData.name
             });
 
             onClose();
         } catch (err: any) {
-            setError(err.message);
+            setErrors
             console.error(err.message);
         } finally {
             setLoading(false);
             console.log(mode === 'login');
         }
+        }
     };
 
-    const updateField = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
@@ -177,9 +193,14 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                                             value={formData.name}
                                             onChange={(e) => updateField('name', e.target.value)}
                                             placeholder="Иван Иванов"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
+                                            className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                                                errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
+                                            }`}
                                         />
                                     </div>
+                                    {errors.name && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -193,10 +214,14 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                                     value={formData.email}
                                     onChange={(e) => updateField('email', e.target.value)}
                                     placeholder="your@email.com"
-                                    required
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
+                                    className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                                        errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
+                                    }`}
                                 />
                             </div>
+                            {errors.email && (
+                                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                            )}
                         </div>
 
                         <AnimatePresence mode="wait">
@@ -217,9 +242,14 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                                             value={formData.phone}
                                             onChange={(e) => updateField('phone', e.target.value)}
                                             placeholder="+7 (900) 123-45-67"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
+                                            className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                                                errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
+                                            }`}
                                         />
                                     </div>
+                                    {errors.phone && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -233,8 +263,9 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                                     value={formData.password}
                                     onChange={(e) => updateField('password', e.target.value)}
                                     placeholder="••••••••"
-                                    required
-                                    className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
+                                    className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                                        errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
+                                    }`}
                                 />
                                 <button
                                     type="button"
@@ -244,6 +275,9 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
+                            {errors.password && (
+                                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                            )}
                         </div>
 
                         {mode === 'login' && (
@@ -260,18 +294,21 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            disabled={loading}
                             type="submit"
                             className="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all"
                         >
-                            {loading
-                                ? 'Загрузка...'
-                                : mode === 'login'
-                                    ? 'Войти'
-                                    : 'Зарегистрироваться'}
+                            {mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
                         </motion.button>
                     </form>
 
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-4 bg-white text-gray-500">или продолжить с</span>
+                        </div>
+                    </div>
 
 
                     {mode === 'login' ? (

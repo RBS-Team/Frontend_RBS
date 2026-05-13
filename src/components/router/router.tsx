@@ -7,6 +7,7 @@ import {MasterDashboard} from "../master/MasterDashboard";
 import {SmartSearch} from "../SmartSearch/SmartSearch";
 import {CategoriesView} from "../CategoryViews/CategoryViews";
 import {CategoryMasters} from "../CategoryMasters/CategoryMasters";
+import {AdminDashboard} from "../admin/AdminDashboard";
 
 
 export default function AppRouter() {
@@ -36,6 +37,11 @@ export default function AppRouter() {
             <Route path="/master/register" element={
                     <MasterRegistration />
             }/>
+
+            <Route path="/admin/dashboard" element={
+                <AdminDashboard/>
+            }/>
+
 
             <Route path="*" element={<Navigate to="/" replace />} />
 

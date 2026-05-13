@@ -21,7 +21,6 @@ export function CallToAction() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <button className="group px-8 py-4 bg-white text-pink-600 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2 shadow-xl hover:shadow-2xl">
                             Найти мастера
-                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                         <button className="px-8 py-4 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors border-2 border-white/30">
                             Стать мастером
