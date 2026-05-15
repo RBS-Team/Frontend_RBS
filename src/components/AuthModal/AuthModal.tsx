@@ -16,7 +16,8 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
         password: ''
@@ -34,8 +35,10 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
     };
+
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
         password: ''
@@ -43,51 +46,70 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        if (validateForm()) {
-        try {
-            const url = mode === 'login'
-                ? '/login'
-                : '/client/register';
 
-            const payload =  mode !== 'login' ?{
+        if (!validateForm()) return;
+
+        setLoading(true);
+
+        try {
+            const url =
+                mode === 'login'
+                    ? '/login'
+                    : '/client/register';
+
+            const payload =
+                mode !== 'login'
+                    ? {
                         email: formData.email,
                         password: formData.password,
-                        first_name: formData.name,
-                        last_name: formData.name,
+                        first_name: formData.firstName,
+                        last_name: formData.lastName,
                         phone: formData.phone,
-                    } :
-                {email: formData.email,
-                password: formData.password
-                } ;
+                    }
+                    : {
+                        email: formData.email,
+                        password: formData.password,
+                    };
 
             const res = await apiFetch(url, {
                 method: 'POST',
                 body: JSON.stringify(payload),
             });
 
+            const data = await res.data;
+
             if (!res.ok) {
-                const data = await res.data;
                 throw new Error(data.message || 'Ошибка запроса');
             }
 
-            const data = await res.data;
-            console.log(data);
+            let usr: any = null;
+            console.log(data)
+            if (data.role === 'master') {
+                const result = await apiFetch(`/masters/user/${data.id}`);
+                usr = result.data;
+            } else if (data.role === 'client') {
+                const result = await apiFetch(`/clients/user/${data.user_id}`);
+                usr = result.data;
+            }
 
             onSuccess({
-                id: data.id,
+                id: data.user_id,
                 role: data.role,
-                name: formData.name
+                name: `${usr.first_name} ${usr.last_name}`,
             });
 
             onClose();
+
         } catch (err: any) {
-            setErrors
             console.error(err.message);
+
+            setErrors(prev => ({
+                ...prev,
+                email: err.message || 'Ошибка авторизации'
+            }));
+
         } finally {
             setLoading(false);
-            console.log(mode === 'login');
-        }
         }
     };
 
@@ -142,11 +164,11 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                             onClick={() => setMode('login')}
                             className="flex-1 relative py-3 rounded-xl transition-all"
                         >
-              <span className={`relative z-10 transition-colors ${
-                  mode === 'login' ? 'text-white' : 'text-gray-600'
-              }`}>
-                Вход
-              </span>
+                            <span className={`relative z-10 transition-colors ${
+                                mode === 'login' ? 'text-white' : 'text-gray-600'
+                            }`}>
+                                Вход
+                            </span>
                             {mode === 'login' && (
                                 <motion.div
                                     layoutId="activeTab"
@@ -159,11 +181,11 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                             onClick={() => setMode('register')}
                             className="flex-1 relative py-3 rounded-xl transition-all"
                         >
-              <span className={`relative z-10 transition-colors ${
-                  mode === 'register' ? 'text-white' : 'text-gray-600'
-              }`}>
-                Регистрация
-              </span>
+                            <span className={`relative z-10 transition-colors ${
+                                mode === 'register' ? 'text-white' : 'text-gray-600'
+                            }`}>
+                                Регистрация
+                            </span>
                             {mode === 'register' && (
                                 <motion.div
                                     layoutId="activeTab"
@@ -183,24 +205,45 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                                     exit={{ opacity: 0, height: 0 }}
                                     transition={{ duration: 0.3 }}
                                 >
+                                    {/* Имя */}
                                     <label className="block text-sm text-gray-700 mb-2">Имя</label>
+                                    <div className="relative mb-4">
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                        <motion.input
+                                            initial={{ x: -20, opacity: 0 }}
+                                            animate={{ x: 0, opacity: 1 }}
+                                            type="text"
+                                            value={formData.firstName}
+                                            onChange={(e) => updateField('firstName', e.target.value)}
+                                            placeholder="Иван"
+                                            className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                                                errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
+                                            }`}
+                                        />
+                                        {errors.firstName && (
+                                            <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Фамилия */}
+                                    <label className="block text-sm text-gray-700 mb-2">Фамилия</label>
                                     <div className="relative">
                                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                                         <motion.input
                                             initial={{ x: -20, opacity: 0 }}
                                             animate={{ x: 0, opacity: 1 }}
                                             type="text"
-                                            value={formData.name}
-                                            onChange={(e) => updateField('name', e.target.value)}
-                                            placeholder="Иван Иванов"
+                                            value={formData.lastName}
+                                            onChange={(e) => updateField('lastName', e.target.value)}
+                                            placeholder="Иванов"
                                             className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:bg-white transition-all ${
-                                                errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
+                                                errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
                                             }`}
                                         />
+                                        {errors.lastName && (
+                                            <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+                                        )}
                                     </div>
-                                    {errors.name && (
-                                        <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
