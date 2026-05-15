@@ -178,7 +178,6 @@ export function UserProfile({ onClose, onUpdateUser }: UserProfileProps) {
                 email: formData.email
             });
 
-            alert('Профиль успешно обновлен!');
         } catch (error) {
             console.error('Ошибка сохранения профиля:', error);
             alert('Ошибка при сохранении профиля');
@@ -217,9 +216,6 @@ export function UserProfile({ onClose, onUpdateUser }: UserProfileProps) {
             setShowCancelModal(false);
             setCancellingBooking(null);
             setCancelReason('');
-
-            // Показываем сообщение об успехе
-            alert('Запись успешно отменена');
         } catch (error) {
             console.error('Ошибка отмены записи:', error);
             alert(error instanceof Error ? error.message : 'Ошибка при отмене записи');
