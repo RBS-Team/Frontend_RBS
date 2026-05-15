@@ -2,6 +2,7 @@ import mmrgl from 'mmr-gl';
 import { useEffect, useRef, useState } from 'react';
 import { Star, X } from 'lucide-react';
 import defaultAvatar from '../../static/imgs/avatarka.jpg';
+
 interface Master {
     id: string;
     name: string;
@@ -12,7 +13,7 @@ interface Master {
     location: string;
     priceFrom: number;
     lat: number;
-    lng: number;
+    lon: number;  // Исправлено: было lng, теперь lon для совместимости с вашими данными
 }
 
 interface MapComponentProps {
@@ -25,6 +26,23 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
     const mapRef = useRef<any>(null);
     const markersRef = useRef<any[]>([]);
     const [selectedMaster, setSelectedMaster] = useState<Master | null>(null);
+
+    // Обработчик клика по маркеру
+    const handleMarkerClick = (master: Master) => {
+        setSelectedMaster(master);
+        // Если передан колбэк из родителя, вызываем его
+        if (onMasterSelect) {
+            onMasterSelect(master);
+        }
+    };
+
+    // Обработчик записи из попапа
+    const handleBookClick = (master: Master) => {
+        if (onMasterSelect) {
+            onMasterSelect(master);
+        }
+        setSelectedMaster(null); // Закрываем попап после клика
+    };
 
     useEffect(() => {
         if (!mapContainerRef.current) return;
@@ -54,54 +72,45 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
 
             // Добавляем маркеры для каждого мастера
             masters.forEach((master) => {
-                // 1. Преобразуем координаты в числа
+                // Преобразуем координаты в числа
                 const rawLng = parseFloat(master.lon as any);
                 const rawLat = parseFloat(master.lat as any);
 
-                // 2. Защита от NaN: пропускаем элемент, если данные повреждены
+                // Защита от NaN: пропускаем элемент, если данные повреждены
                 if (isNaN(rawLng) || isNaN(rawLat)) {
-                    console.warn(`Пропущен мастер ${master.name} из-за невалидных координат:`, { lng: master.lng, lat: master.lat });
+                    console.warn(`Пропущен мастер ${master.name} из-за невалидных координат:`, { lng: master.lon, lat: master.lat });
                     return;
                 }
 
-                // 3. Обрезаем координаты ровно до 2 знаков после запятой
-                const lng = parseFloat(rawLng.toFixed(2));
-                const lat = parseFloat(rawLat.toFixed(2));
+                // Обрезаем координаты
+                const lng = parseFloat(rawLng.toFixed(6));
+                const lat = parseFloat(rawLat.toFixed(6));
 
                 // Создаем DOM элемент для маркера
                 const el = document.createElement('div');
                 el.className = 'custom-marker';
                 el.style.cursor = 'pointer';
-                console.log(master);
 
                 // HTML структура маркера с фото мастера
                 el.innerHTML = `
-          <div style="position: relative; width: 56px; height: 56px;">
-            <!-- Тень маркера -->
-            <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 32px; height: 8px; background: rgba(0,0,0,0.2); border-radius: 50%; filter: blur(4px);"></div>
+                    <div style="position: relative; width: 56px; height: 56px;">
+                        <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 32px; height: 8px; background: rgba(0,0,0,0.2); border-radius: 50%; filter: blur(4px);"></div>
+                        <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 48px; height: 48px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: white;">
+                            <img src="${master.avatar_url || defaultAvatar}" alt="${master.name}" style="width: 100%; height: 100%; object-fit: cover;" />
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(236, 72, 153, 0.3), transparent);"></div>
+                        </div>
+                        <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"></div>
+                        <div style="position: absolute; top: -4px; right: -4px; background: linear-gradient(to right, #facc15, #f97316); color: white; font-size: 10px; padding: 2px 6px; border-radius: 12px; display: flex; align-items: center; gap: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-weight: 600;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <span>${master.rating}</span>
+                        </div>
+                    </div>
+                `;
 
-            <!-- Капля маркера -->
-            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 48px; height: 48px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: white;">
-              <img src="${master.avatar_url || defaultAvatar}" alt="${master.name}" style="width: 100%; height: 100%; object-fit: cover;" />
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(236, 72, 153, 0.3), transparent);"></div>
-            </div>
-
-            <!-- Хвостик маркера -->
-            <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"></div>
-
-            <!-- Рейтинг бейдж -->
-            <div style="position: absolute; top: -4px; right: -4px; background: linear-gradient(to right, #facc15, #f97316); color: white; font-size: 10px; padding: 2px 6px; border-radius: 12px; display: flex; align-items: center; gap: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-weight: 600;">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              <span>${master.rating}</span>
-            </div>
-          </div>
-        `;
-
-                el.addEventListener('click', () => {
-                    setSelectedMaster(master);
-                    if (onMasterSelect) {
-                        onMasterSelect(master);
-                    }
+                // ВАЖНО: создаем замыкание с текущим мастером
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    handleMarkerClick(master);
                 });
 
                 const marker = new mmrgl.Marker({ element: el, anchor: "center", offset: [0, -8] })
@@ -126,7 +135,7 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
                 mapRef.current = null;
             }
         };
-    }, [masters, onMasterSelect]);
+    }, [masters]); // Убрал onMasterSelect из зависимостей, чтобы не пересоздавать карту
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -164,11 +173,7 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
                         </div>
 
                         <button
-                            onClick={() => {
-                                if (onMasterSelect) {
-                                    onMasterSelect(selectedMaster);
-                                }
-                            }}
+                            onClick={() => handleBookClick(selectedMaster)}
                             className="w-full py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
                         >
                             Записаться

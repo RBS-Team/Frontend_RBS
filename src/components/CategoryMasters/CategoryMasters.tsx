@@ -1,3 +1,4 @@
+// CategoryMasters.tsx - исправленная версия
 import { useEffect, useState, useMemo } from 'react';
 import {
     X,
@@ -12,7 +13,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../api/apiFetch';
 import { MapComponent } from '../VK_Maps/map';
 import { BookingModal } from '../BookingModal/BookingModal';
-import { AuthModal } from '../AuthModal/AuthModal'; // Добавьте импорт
+import { AuthModal } from '../AuthModal/AuthModal';
 
 interface masters {
     id: string;
@@ -33,9 +34,8 @@ interface masters {
 
 interface CategoryMastersProps {
     categoryTitle: string;
-    onClose: () => void;
+    onClose?: () => void;
     onBack?: () => void;
-    onBookClick: (masters: any) => void;
 }
 
 export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
@@ -48,19 +48,17 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
 
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [selectedMaster, setSelectedMaster] = useState<any>(null);
-    const [showAuthModal, setShowAuthModal] = useState(false); // Добавьте состояние для модалки авторизации
+    const [showAuthModal, setShowAuthModal] = useState(false);
 
-    // Храним весь массив мастеров (33 записи), полученный от сервера
     const [allMasters, setAllMasters] = useState<masters[]>([]);
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [loading, setLoading] = useState(false);
-    const [currentUser, setCurrentUser] = useState<any>(null); // Добавьте состояние для пользователя
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     const navigate = useNavigate();
     const { id } = useParams();
 
-    // Функция для проверки авторизации пользователя
     const checkUserAuth = () => {
         const user = localStorage.getItem('user');
         if (user) {
@@ -76,32 +74,22 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
         return null;
     };
 
-    // Обновленная функция handleBookClick
     const handleBookClick = (master: any) => {
-        // Проверяем наличие пользователя в localStorage
         const user = checkUserAuth();
 
         if (!user) {
-            // Если пользователь не авторизован, показываем модалку авторизации
             setSelectedMaster(master);
             setShowAuthModal(true);
         } else {
-            // Если пользователь авторизован, показываем модалку бронирования
             setSelectedMaster(master);
             setShowBookingModal(true);
         }
     };
 
-    // Функция для обработки успешной авторизации
     const handleAuthSuccess = (user: { id: string; role: string; name: string }) => {
-        // Сохраняем пользователя в localStorage (если еще не сохранен)
         localStorage.setItem('user', JSON.stringify(user));
         setCurrentUser(user);
-
-        // Закрываем модалку авторизации
         setShowAuthModal(false);
-
-        // Открываем модалку бронирования для выбранного мастера
         if (selectedMaster) {
             setShowBookingModal(true);
         }
@@ -111,7 +99,6 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
     const onBack = () => navigate(-1);
 
     useEffect(() => {
-        // Проверяем авторизацию при загрузке компонента
         checkUserAuth();
     }, []);
 
@@ -130,12 +117,10 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
             .finally(() => setLoading(false));
     }, [id]);
 
-    // Сбрасываем страницу на первую при любом изменении фильтрации
     useEffect(() => {
         setPage(1);
     }, [priceRange, minRating, selectedCity, sortBy]);
 
-    // 1. Фильтрация и сортировка полного списка на клиенте
     const filteredAndSortedMasters = useMemo(() => {
         let result = [...allMasters];
 
@@ -166,7 +151,6 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
         return result;
     }, [allMasters, priceRange, minRating, selectedCity, sortBy]);
 
-    // 2. Нарезка отфильтрованного списка на страницы по 10 элементов
     const displayedMasters = useMemo(() => {
         const startIndex = (page - 1) * limit;
         return filteredAndSortedMasters.slice(startIndex, startIndex + limit);
@@ -252,7 +236,7 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
                 </div>
             </div>
 
-            {/* MAIN CONTENT (pb-24 добавлен для исключения перекрытия карточек нижней панелью) */}
+            {/* MAIN CONTENT */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24">
                 {viewMode === 'list' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -266,8 +250,10 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
                     </div>
                 ) : (
                     <div className="h-[600px] rounded-xl overflow-hidden border border-gray-200">
-                        {/* На карту выводим всех отфильтрованных мастеров без постраничной нарезки */}
-                        <MapComponent masters={filteredAndSortedMasters} />
+                        <MapComponent
+                            masters={filteredAndSortedMasters}
+                            onMasterSelect={handleBookClick}
+                        />
                     </div>
                 )}
             </div>
