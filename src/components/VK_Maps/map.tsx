@@ -1,12 +1,12 @@
 import mmrgl from 'mmr-gl';
 import { useEffect, useRef, useState } from 'react';
 import { Star, X } from 'lucide-react';
-
+import defaultAvatar from '../../static/imgs/avatarka.jpg';
 interface Master {
     id: string;
     name: string;
     specialty: string;
-    imageUrl: string;
+    avatar_url: string;
     rating: number;
     reviews: number;
     location: string;
@@ -49,14 +49,31 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
             markersRef.current.forEach(marker => marker.remove());
             markersRef.current = [];
 
+            const bounds = new mmrgl.LngLatBounds();
+            let validMarkersCount = 0;
+
             // Добавляем маркеры для каждого мастера
             masters.forEach((master) => {
+                // 1. Преобразуем координаты в числа
+                const rawLng = parseFloat(master.lon as any);
+                const rawLat = parseFloat(master.lat as any);
+
+                // 2. Защита от NaN: пропускаем элемент, если данные повреждены
+                if (isNaN(rawLng) || isNaN(rawLat)) {
+                    console.warn(`Пропущен мастер ${master.name} из-за невалидных координат:`, { lng: master.lng, lat: master.lat });
+                    return;
+                }
+
+                // 3. Обрезаем координаты ровно до 2 знаков после запятой
+                const lng = parseFloat(rawLng.toFixed(2));
+                const lat = parseFloat(rawLat.toFixed(2));
+
                 // Создаем DOM элемент для маркера
                 const el = document.createElement('div');
                 el.className = 'custom-marker';
                 el.style.cursor = 'pointer';
-                el.style.cursor = 'pointer';
                 console.log(master);
+
                 // HTML структура маркера с фото мастера
                 el.innerHTML = `
           <div style="position: relative; width: 56px; height: 56px;">
@@ -65,7 +82,7 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
 
             <!-- Капля маркера -->
             <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 48px; height: 48px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: white;">
-              <img src="${master.imageUrl}" alt="${master.name}" style="width: 100%; height: 100%; object-fit: cover;" />
+              <img src="${master.avatar_url || defaultAvatar}" alt="${master.name}" style="width: 100%; height: 100%; object-fit: cover;" />
               <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(236, 72, 153, 0.3), transparent);"></div>
             </div>
 
@@ -80,7 +97,6 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
           </div>
         `;
 
-                // Добавляем обработчик клика
                 el.addEventListener('click', () => {
                     setSelectedMaster(master);
                     if (onMasterSelect) {
@@ -88,20 +104,16 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
                     }
                 });
 
-                // Создаем и добавляем маркер на карту
-                const marker = new mmrgl.Marker({ element: el, anchor: "center",offset: [0, -8] })
-                    .setLngLat([master.lng, master.lat])
+                const marker = new mmrgl.Marker({ element: el, anchor: "center", offset: [0, -8] })
+                    .setLngLat([lng, lat])
                     .addTo(map);
 
                 markersRef.current.push(marker);
+                bounds.extend([lng, lat]);
+                validMarkersCount++;
             });
 
-            // Центрируем карту по всем маркерам
-            if (masters.length > 0) {
-                const bounds = new mmrgl.LngLatBounds();
-                masters.forEach(master => {
-                    bounds.extend([master.lng, master.lat]);
-                });
+            if (validMarkersCount > 0) {
                 map.fitBounds(bounds, { padding: 100, maxZoom: 14 });
             }
         });
@@ -120,7 +132,6 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
-            {/* Попап с информацией о выбранном мастере */}
             {selectedMaster && (
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 z-10 w-80 max-w-[calc(100vw-2rem)]">
                     <div className="p-4">
@@ -133,7 +144,7 @@ export function MapComponent({ masters, onMasterSelect }: MapComponentProps) {
 
                         <div className="flex items-start gap-3 mb-3">
                             <img
-                                src={selectedMaster.imageUrl}
+                                src={selectedMaster.avatar_url || defaultAvatar}
                                 alt={selectedMaster.name}
                                 className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
                             />

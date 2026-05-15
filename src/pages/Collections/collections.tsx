@@ -69,8 +69,6 @@ export default function collections() {
     }, []);
 
     const handleAdminBlock = () =>{
-        localStorage.setItem("IsAdmin", "true");
-        console.log(localStorage.getItem("IsAdmin"));
         navigate('/admin/dashboard');
     }
 
@@ -94,13 +92,6 @@ export default function collections() {
         localStorage.removeItem('user');
     };
 
-    // const handleBookClick = (master: typeof selectedMaster) => {
-    //     if (!user) {
-    //         setShowAuthModal(true);
-    //     } else {
-    //         setSelectedMaster(master);
-    //     }
-    // };
 
     useEffect(() => {
         apiFetch("/categories")
