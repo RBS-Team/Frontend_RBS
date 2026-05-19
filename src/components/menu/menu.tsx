@@ -69,7 +69,6 @@ export function Menu({ onLoginClick, user: initialUser, onProfileClick }: Header
                         <span className="text-xl font-semibold">Okoshki</span>
                     </div>
 
-                    {/* Навигация */}
                     <nav className="hidden md:flex items-center gap-8">
                         <button onClick={onServiceClick} className="text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
                             Услуги
@@ -82,7 +81,6 @@ export function Menu({ onLoginClick, user: initialUser, onProfileClick }: Header
                         </button>
                     </nav>
 
-                    {/* Блок авторизации */}
                     <div className="flex items-center gap-3">
                         {currentUser?.role==="client" || currentUser?.role==="master"  ? (
                             <>

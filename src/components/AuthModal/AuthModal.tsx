@@ -3,15 +3,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles } from 'lucide-react';
 import {apiFetch} from "../../api/apiFetch";
 import {hasErrors, validateAuthForm} from "../../utils/validation";
+import {useToast} from "../../hooks/useToasts";
+import {ToastContainer} from "../Toasts/Toasts";
 
 interface AuthModalProps {
     onClose: () => void;
     onSuccess: (user: { id: string; role: string; name: string}) => void;
+    onShowToast?: (message: string, type: 'success' | 'error') => void;
 }
 
 type AuthMode = 'login' | 'register';
 
-export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
+export function AuthModal({ onClose, onSuccess, onShowToast }: AuthModalProps) {
     const [mode, setMode] = useState<AuthMode>('login');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -22,6 +25,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
         phone: '',
         password: ''
     });
+    const toast = useToast();
 
     const validateForm = (): boolean => {
         const newErrors = validateAuthForm(formData, mode);
@@ -97,6 +101,13 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
                 role: data.role,
                 name: `${usr.first_name} ${usr.last_name}`,
             });
+
+            if (onShowToast) {
+                onShowToast(
+                    mode === 'login' ? 'Вы успешно вошли в систему!' : 'Регистрация прошла успешно!',
+                    'success'
+                );
+            }
 
             onClose();
 

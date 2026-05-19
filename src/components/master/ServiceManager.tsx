@@ -9,9 +9,11 @@ interface Service {
     duration_minutes: number;
     price: number;
     description: string;
+    onShowToast?: (message: string, type: 'success' | 'error') => void;
+    masterID: string;
 }
 
-export function ServiceManager() {
+export function ServiceManager({onShowToast, masterID} : Service) {
     const [services, setServices] = useState<Service[]>([]);
     const [categories, setCategories] = useState<Service[]>([]);
     const [errors, setErrors] = useState({
@@ -32,7 +34,7 @@ export function ServiceManager() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     useEffect(() => {
-        const id = user?.id;
+        const id = masterID;
 
         apiFetch(`/masters/${id}/services`)
             .then((res) => {
@@ -114,7 +116,7 @@ export function ServiceManager() {
 
     const saveService = async () => {
         try {
-            const id = user?.master_id;
+            const id = user?.id;
             console.log(id);
 
             if (editingService) {
@@ -174,6 +176,13 @@ export function ServiceManager() {
                         );
                     }
 
+                    if (onShowToast) {
+                        onShowToast(
+                            'Услуга успешно создана!',
+                            'success'
+                        );
+                    }
+
                     setServices((prev) => [...prev, res.data]);
                     closeForm();
                 }
@@ -193,7 +202,7 @@ export function ServiceManager() {
 
     const deleteService = async (id: string) => {
         try {
-            const masterId = user?.master_id;
+            const masterId = user?.id;
 
             const res = await apiFetch(
                 `/masters/${masterId}/services/${id}`,
@@ -207,7 +216,12 @@ export function ServiceManager() {
                     res.data?.message || 'Ошибка удаления'
                 );
             }
-
+            if (onShowToast) {
+                onShowToast(
+                    'Услуга успешно удалена!',
+                    'info'
+                );
+            }
             setServices((prev) =>
                 prev.filter((service) => service.id !== id)
             );

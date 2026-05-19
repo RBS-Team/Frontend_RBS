@@ -14,6 +14,8 @@ import { apiFetch } from '../../api/apiFetch';
 import { MapComponent } from '../VK_Maps/map';
 import { BookingModal } from '../BookingModal/BookingModal';
 import { AuthModal } from '../AuthModal/AuthModal';
+import {useToast} from "../../hooks/useToasts";
+import {ToastContainer} from "../Toasts/Toasts";
 
 interface masters {
     id: string;
@@ -55,6 +57,7 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
     const [limit] = useState(10);
     const [loading, setLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const toast = useToast();
 
     const navigate = useNavigate();
     const { id } = useParams();
@@ -299,6 +302,10 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
                         setSelectedMaster(null);
                     }}
                     onSuccess={handleAuthSuccess}
+                    onShowToast={(message, type) => {
+                        if (type === 'success') toast.success(message);
+                        else toast.error(message);
+                    }}
                 />
             )}
 
@@ -309,8 +316,10 @@ export function CategoryMasters({ categoryTitle }: CategoryMastersProps) {
                         setShowBookingModal(false);
                         setSelectedMaster(null);
                     }}
+                    onSuccess={() => toast.success('Запись успешно создана!')}
                 />
             )}
+            <ToastContainer toasts={toast.toasts} onClose={toast.removeToast} />
         </div>
     );
 }

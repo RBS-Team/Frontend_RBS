@@ -20,6 +20,8 @@ import { useNavigate } from 'react-router-dom';
 import { ScheduleManager } from './ScheduleManager';
 
 import { apiFetch } from '../../api/apiFetch';
+import {ToastContainer} from "../Toasts/Toasts";
+import {useToast} from "../../hooks/useToasts";
 
 interface MasterDashboardProps {
     onLogout?: () => void;
@@ -69,6 +71,7 @@ export function MasterDashboard({
     const [todayBookings, setTodayBookings] =
         useState<TodayBooking[]>([]);
 
+
     const [loadingToday, setLoadingToday] =
         useState(true);
 
@@ -76,7 +79,10 @@ export function MasterDashboard({
         localStorage.getItem('user') || '{}'
     );
 
+    console.log(user)
+
     const navigate = useNavigate();
+    const toast = useToast();
 
     const onClose = () => {
         navigate('/');
@@ -471,7 +477,15 @@ export function MasterDashboard({
 
                         {activeSection ===
                             'services' && (
-                                <ServiceManager />
+                                <ServiceManager
+                                    masterID={
+                                        user.id
+                                    }
+                                    onShowToast={(message, type) => {
+                                    if (type === 'success') toast.success(message);
+                                    else toast.error(message);
+                                }}/>
+
                             )}
 
                         {activeSection ===
@@ -480,6 +494,10 @@ export function MasterDashboard({
                                     masterId={
                                         user.id
                                     }
+                                    onShowToast={(message, type) => {
+                                        if (type === 'success') toast.success(message);
+                                        else toast.error(message);
+                                    }}
                                 />
                             )}
 
@@ -489,18 +507,26 @@ export function MasterDashboard({
                                     masterID={
                                         user.id
                                     }
+                                    onShowToast={(message, type) => {
+                                        if (type === 'success') toast.success(message);
+                                        else toast.error(message);
+                                    }}
                                 />
                             )}
 
                         {activeSection ===
                             'bookings' && (
-                                <BookingsManager />
+                                <BookingsManager onShowToast={(message, type) => {
+                                    if (type === 'success') toast.success(message);
+                                    else toast.error(message);
+                                }}/>
                             )}
 
                         {activeSection ===
                             'reviews' && (
                                 <ReviewsManager />
                             )}
+                        <ToastContainer toasts={toast.toasts} onClose={toast.removeToast} />
                     </main>
                 </div>
             </div>

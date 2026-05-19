@@ -234,7 +234,7 @@ export function BookingModal({ master, onClose, onSuccess }: BookingModalProps) 
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-1000 p-4">
             <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Шапка модального окна */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-20">
@@ -409,8 +409,6 @@ export function BookingModal({ master, onClose, onSuccess }: BookingModalProps) 
                                     )}
                                 </div>
                             </div>
-
-                            {/* Поле для комментария клиента */}
                             {canBook && (
                                 <div className="pt-4">
                                     <label htmlFor="clientComment" className="text-sm font-medium text-gray-700 mb-2 block">
@@ -427,14 +425,12 @@ export function BookingModal({ master, onClose, onSuccess }: BookingModalProps) 
                                 </div>
                             )}
 
-                            {/* Отображение ошибки */}
                             {error && (
                                 <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm">
                                     {error}
                                 </div>
                             )}
 
-                            {/* Итоговая строка и кнопка подтверждения */}
                             <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 {canBook && selectedServiceData && (
                                     <div className="text-sm text-gray-600">
