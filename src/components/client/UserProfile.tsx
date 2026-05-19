@@ -7,6 +7,7 @@ interface UserProfileProps {
     user: { id: string; name: string; email: string; role: string };
     onClose: () => void;
     onUpdateUser: (user: { name: string; email: string }) => void;
+    onShowToast?: (message: string, type: 'success' | 'error') => void;
 }
 
 interface Booking {
@@ -45,9 +46,10 @@ interface ApiAppointment {
     service_title: string;
     start_at: string;
     status: string;
+
 }
 
-export function UserProfile({ onClose, onUpdateUser }: UserProfileProps) {
+export function UserProfile({ onClose, onUpdateUser, onShowToast }: UserProfileProps) {
     const [activeTab, setActiveTab] = useState<'profile' | 'bookings'>('profile');
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancellingBooking, setCancellingBooking] = useState<string | null>(null);
@@ -178,6 +180,11 @@ export function UserProfile({ onClose, onUpdateUser }: UserProfileProps) {
                 email: formData.email
             });
 
+            if (onShowToast) {
+                onShowToast('Профиль успешно обновлен!', 'success');
+            }
+            onClose();
+
         } catch (error) {
             console.error('Ошибка сохранения профиля:', error);
             alert('Ошибка при сохранении профиля');
@@ -192,7 +199,6 @@ export function UserProfile({ onClose, onUpdateUser }: UserProfileProps) {
         try {
             setCancelling(true);
 
-            // Отправляем PATCH запрос на отмену записи
             const response = await apiFetch(`/appointments/${cancellingBooking}/cancel`, {
                 method: 'PATCH',
                 body: JSON.stringify({ reason: cancelReason })
@@ -212,7 +218,11 @@ export function UserProfile({ onClose, onUpdateUser }: UserProfileProps) {
                 )
             );
 
+
             // Закрываем модальное окно и сбрасываем состояние
+            if (onShowToast) {
+                onShowToast('Запись успешно отменена', 'success');
+            }
             setShowCancelModal(false);
             setCancellingBooking(null);
             setCancelReason('');

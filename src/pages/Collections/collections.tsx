@@ -13,7 +13,8 @@ import { Scissors, Sparkles, Heart, Clock } from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import {UserProfile} from "../../components/client/UserProfile";
 import {apiFetch} from "../../api/apiFetch";
-
+import {ToastContainer} from "../../components/Toasts/Toasts";
+import {useToast} from "../../hooks/useToasts";
 
 interface User {
     id: string;
@@ -25,6 +26,7 @@ export default function collections() {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [user, setUser] = useState<User | null>(null);
     const [showUserProfile, setShowUserProfile] = useState(false);
+    const toast = useToast();
 
     const [categories, setCategories] = useState([]);
 
@@ -299,7 +301,7 @@ export default function collections() {
             <Menu
                 user={user}
                 onLogout={handleLogout}
-                onLoginClick={() => setShowAuthModal(true)}
+                onLoginClick={() => {setShowAuthModal(true);}}
                 onProfileClick={() => {
                     if(user.role === "master"){
                         navigate("/master/dashboard");
@@ -432,6 +434,7 @@ export default function collections() {
                     rating={selectedMaster.rating}
                     reviews={selectedMaster.reviews}
                     onClose={() => setSelectedMaster(null)}
+                    onSuccess={() => toast.success('Запись успешно создана!')}
                 />
             )}
 
@@ -439,6 +442,10 @@ export default function collections() {
                 <AuthModal
                     onClose={() => setShowAuthModal(false)}
                     onSuccess={handleAuthSuccess}
+                    onShowToast={(message, type) => {
+                        if (type === 'success') toast.success(message);
+                        else toast.error(message);
+                    }}
                 />
             )}
 
@@ -447,8 +454,13 @@ export default function collections() {
                     user={user}
                     onClose={() => setShowUserProfile(false)}
                     onUpdateUser={handleUpdateUser}
+                    onShowToast={(message, type) => {
+                        if (type === 'success') toast.success(message);
+                        else toast.error(message);
+                    }}
                 />
             )}
+            <ToastContainer toasts={toast.toasts} onClose={toast.removeToast} />
         </div>
     );
 }

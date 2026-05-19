@@ -78,7 +78,12 @@ export function MasterRegistration() {
 
     const handleAuthSuccess = (userData: User) => {
         setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
+        const answ = {
+            id: userData.master_id,
+            name: userData.first_name + ' ' + userData.last_name,
+            role: userData.role,
+        };
+        localStorage.setItem('user', JSON.stringify(answ));
         navigate('/master/dashboard');
     };
 
