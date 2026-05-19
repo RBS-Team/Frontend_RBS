@@ -1,11 +1,8 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useRef} from 'react';
 import {Upload, Check, ChevronRight, X, Lock, EyeOff, Eye} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import {apiFetch} from "../../api/apiFetch";
 import {hasErrors, validateMasterAuthForm} from "../../utils/validation";
-
-
-
 
 export function MasterRegistration() {
     const [step, setStep] = useState(1);
@@ -38,6 +35,13 @@ export function MasterRegistration() {
         avatar: ''
     });
     const navigate = useNavigate();
+
+    // Состояния для автодополнения адреса
+    const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [addressInputValue, setAddressInputValue] = useState('');
+    const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const suggestionBoxRef = useRef<HTMLDivElement | null>(null);
 
     const validateForm = (): boolean => {
         const newErrors = validateMasterAuthForm(formData);
@@ -133,94 +137,170 @@ export function MasterRegistration() {
         }
     };
 
+    const fetchAddressSuggestions = async (query: string) => {
+        if (!query.trim() || query.length < 3) {
+            setAddressSuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+
+        try {
+            const apiKey = "6a061cd8ebce7327576438klp345fcb";
+            const response = await fetch(
+                `https://geocode.maps.co/search?q=${encodeURIComponent(query)}&api_key=${apiKey}`
+            );
+
+            if (!response.ok) {
+                throw new Error('Не удалось получить предложения');
+            }
+
+            const data = await response.json();
+
+            if (data && Array.isArray(data)) {
+                const suggestions = data.map((item: any) => item.display_name).slice(0, 5);
+                setAddressSuggestions(suggestions);
+                setShowSuggestions(suggestions.length > 0);
+            } else {
+                setAddressSuggestions([]);
+                setShowSuggestions(false);
+            }
+        } catch (err) {
+            console.error("Ошибка при получении предложений адреса:", err);
+            setAddressSuggestions([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleAddressInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setAddressInputValue(value);
+        updateField('address', value);
+
+        if (addressTimeoutRef.current) {
+            clearTimeout(addressTimeoutRef.current);
+        }
+
+        addressTimeoutRef.current = setTimeout(() => {
+            fetchAddressSuggestions(value);
+        }, 500);
+    };
+
+    const handleSelectSuggestion = (suggestion: string) => {
+        setAddressInputValue(suggestion);
+        updateField('address', suggestion);
+        setShowSuggestions(false);
+        setAddressSuggestions([]);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (suggestionBoxRef.current && !suggestionBoxRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Очистка таймера при размонтировании компонента
+    useEffect(() => {
+        return () => {
+            if (addressTimeoutRef.current) {
+                clearTimeout(addressTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const handleFinish = async () => {
         setLoading(true);
         setError(null);
         console.log(validateForm())
         if (validateForm()) {
-        try {
-            const addressQuery = encodeURIComponent(formData.city + " " + formData.address);
-            const apiKey = "6a061cd8ebce7327576438klp345fcb";
+            try {
+                const addressQuery = encodeURIComponent(formData.city + " " + formData.address);
+                const apiKey = "6a061cd8ebce7327576438klp345fcb";
 
-            const vkResponse = await fetch(
-                `https://geocode.maps.co/search?q=${addressQuery}&api_key=${apiKey}`,
-            );
+                const vkResponse = await fetch(
+                    `https://geocode.maps.co/search?q=${addressQuery}&api_key=${apiKey}`,
+                );
 
-            if (!vkResponse.ok) {
-                setErrors(prev => ({
-                    ...prev,
-                    address: 'Ошибка выполнения запроса'
-                }));
-            }
-
-            const vkData = await vkResponse.json();
-
-            if (!vkData || vkData.length === 0) {
-                setErrors(prev => ({
-                    ...prev,
-                    address: 'Адрес не найден',
-                    city: 'Адрес не найден'
-                }));
-            }
-
-            const location = vkData[0];
-
-            const lat = parseFloat(location.lat);
-            const lon = parseFloat(location.lon);
-
-            const url = "/master/register";
-
-            const payload = {
-                first_name: formData.firstName,
-                last_name: formData.lastName,
-                email: formData.email,
-                lon,
-                lat,
-                category_id: formData.category_id,
-                address: formData.city + " " + formData.address,
-                city: formData.city,
-                password: formData.password,
-                phone: formData.phone,
-                timezone: "Europe/London",
-                role: "master",
-            };
-
-            const res = await apiFetch(url, {
-                method: "POST",
-                body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-                throw new Error(res.data?.message || "Ошибка запроса");
-            }
-
-            const data = await res.data;
-
-            handleAuthSuccess({
-                id: data.user_id,
-                master_id: data.master_id,
-                role: "master",
-            });
-
-            if (formData.avatar instanceof File) {
-                try {
-                    await uploadAvatar(data.master_id, formData.avatar);
-                } catch (e) {
-                    console.error("Avatar upload failed:", e);
+                if (!vkResponse.ok) {
                     setErrors(prev => ({
                         ...prev,
-                        avatar: 'Не удалось загрузить аватар'
+                        address: 'Ошибка выполнения запроса'
                     }));
                 }
-            }
 
-        } catch (err: any) {
-            setError(err.message);
-            console.error(err.message);
-        } finally {
-            setLoading(false);
-        }
+                const vkData = await vkResponse.json();
+
+                if (!vkData || vkData.length === 0) {
+                    setErrors(prev => ({
+                        ...prev,
+                        address: 'Адрес не найден',
+                        city: 'Адрес не найден'
+                    }));
+                }
+
+                const location = vkData[0];
+
+                const lat = parseFloat(location.lat);
+                const lon = parseFloat(location.lon);
+
+                const url = "/master/register";
+
+                const payload = {
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    email: formData.email,
+                    lon,
+                    lat,
+                    category_id: formData.category_id,
+                    address: formData.city + " " + formData.address,
+                    city: formData.city,
+                    password: formData.password,
+                    phone: formData.phone,
+                    timezone: "Europe/London",
+                    role: "master",
+                };
+
+                const res = await apiFetch(url, {
+                    method: "POST",
+                    body: JSON.stringify(payload),
+                });
+
+                if (!res.ok) {
+                    throw new Error(res.data?.message || "Ошибка запроса");
+                }
+
+                const data = await res.data;
+
+                handleAuthSuccess({
+                    id: data.user_id,
+                    master_id: data.master_id,
+                    role: "master",
+                });
+
+                if (formData.avatar instanceof File) {
+                    try {
+                        await uploadAvatar(data.master_id, formData.avatar);
+                    } catch (e) {
+                        console.error("Avatar upload failed:", e);
+                        setErrors(prev => ({
+                            ...prev,
+                            avatar: 'Не удалось загрузить аватар'
+                        }));
+                    }
+                }
+
+            } catch (err: any) {
+                setError(err.message);
+                console.error(err.message);
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -243,8 +323,6 @@ export function MasterRegistration() {
             })
             .catch(console.error);
     }, []);
-
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-12 px-4">
@@ -290,10 +368,10 @@ export function MasterRegistration() {
                                         placeholder="Анна"
                                     />
                                     {errors.firstName && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {errors.firstName}
-                                    </p>
-                                )}
+                                        <p className="text-red-500 text-sm mt-1">
+                                            {errors.firstName}
+                                        </p>
+                                    )}
 
                                 </div>
                                 <div>
@@ -444,17 +522,34 @@ export function MasterRegistration() {
                                     </p>
                                 )}
                             </div>
-                            <div>
+                            <div className="relative">
                                 <label className="block text-sm mb-2">Адрес студии/салона</label>
                                 <input
                                     type="text"
-                                    value={formData.address}
-                                    onChange={(e) => updateField('address', e.target.value)}
-                                    className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500${
+                                    value={addressInputValue || formData.address}
+                                    onChange={handleAddressInputChange}
+                                    className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
                                         errors.address ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-pink-500'
                                     }`}
                                     placeholder="ул. Тверская, д. 1"
+                                    autoComplete="off"
                                 />
+                                {showSuggestions && addressSuggestions.length > 0 && (
+                                    <div
+                                        ref={suggestionBoxRef}
+                                        className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                                    >
+                                        {addressSuggestions.map((suggestion, index) => (
+                                            <div
+                                                key={index}
+                                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                onClick={() => handleSelectSuggestion(suggestion)}
+                                            >
+                                                {suggestion}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                                 {errors.address && (
                                     <p className="text-red-500 text-sm mt-1">
                                         {errors.address}
